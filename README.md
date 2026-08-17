@@ -297,6 +297,10 @@ PodGauge is unofficial Fan Content. It is not approved or endorsed by Wizards of
 
 See the [Wizards of the Coast Fan Content Policy](https://company.wizards.com/en/legal/fancontentpolicy) for additional information.
 
+## Author
+
+PodGauge is created and developed by Stephen Sawyer (`dunamismax`).
+
 ## License
 
-PodGauge's original software and documentation are licensed under the [MIT License](LICENSE). This license does not grant rights to Wizards of the Coast material, card images, third-party datasets, or contributed fixtures; each such source remains subject to its own reviewed terms, provenance, and permissions.
+Copyright (c) 2026 Stephen Sawyer. PodGauge's original software and documentation are licensed under the [MIT License](LICENSE). This license does not grant rights to Wizards of the Coast material, card images, third-party datasets, or contributed fixtures; each such source remains subject to its own reviewed terms, provenance, and permissions.

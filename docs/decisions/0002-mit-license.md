@@ -2,7 +2,7 @@
 
 - Status: accepted
 - Date: 2026-08-17
-- Deciders: repository owner
+- Deciders: Stephen Sawyer (`dunamismax`), repository owner and developer
 - Related tracker item: Phase 0 license decision
 
 ## Context
@@ -16,7 +16,8 @@ rights cannot be granted by the project's software license.
 ## Decision
 
 License PodGauge's original software and documentation under the MIT License,
-using `Copyright (c) 2026 PodGauge contributors`. Record `MIT` in root package
+using `Copyright (c) 2026 Stephen Sawyer`. Record Stephen Sawyer as the author,
+`dunamismax` as the developer handle, and `MIT` in root package
 metadata and keep the canonical license text in the repository-root `LICENSE`.
 
 MIT does not open contribution intake by itself. Before accepting a code or

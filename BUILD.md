@@ -7,8 +7,8 @@ architecture and security blueprint. This file converts those documents into
 ordered, testable work. If they disagree, stop and reconcile the documents in
 the same change before implementing the disputed behavior.
 
-Last reconciled: 2026-08-17 after the MIT license and private-reporting owner
-decisions.
+Last reconciled: 2026-08-17 after the MIT license, authorship, and
+private-reporting owner decisions.
 
 ---
 
@@ -110,8 +110,9 @@ Verified in the repository at the current reconciliation:
       lockfile, unit/property/component/integration/browser tests, and CI.
 - [x] Development PostgreSQL 18.4 is digest-pinned, loopback-only, healthy under
       Compose, and accepts the reviewed foundation migration and idempotent seed.
-- [x] PodGauge's original software and documentation use the MIT License;
-      third-party Magic material and fixtures remain outside that grant.
+- [x] PodGauge's original software and documentation are copyright Stephen
+      Sawyer (`dunamismax`) and use the MIT License; third-party Magic material
+      and fixtures remain outside that grant.
 - [x] `SECURITY.md` publishes `dunamismax@tutamail.com` for private vulnerability
       reports without claiming a supported release or response-time SLA.
 - [x] `origin` points to GitHub and `codeberg` points to Codeberg; both `main`
@@ -165,8 +166,9 @@ Every phase must preserve these constraints:
 These are decision gates, not permission for an agent to guess. They block only
 their dependent work.
 
-- [x] **License:** owner selected MIT on 2026-08-17. The decision is implemented
-      in `LICENSE`, package metadata, public policy, and ADR 0002.
+- [x] **License:** owner and developer Stephen Sawyer (`dunamismax`) selected MIT
+      on 2026-08-17. The decision is implemented in `LICENSE`, package metadata,
+      public policy, and ADR 0002.
 - [ ] **Production network:** owner selects DNS-only or Cloudflare-proxied mode.
       Document proxy trust and origin restrictions before trusting forwarded
       client-address headers.
@@ -802,6 +804,12 @@ corepack pnpm benchmark
 docker compose config
 docker compose up -d --wait postgres
 ```
+
+The attribution-only follow-up also reran the frozen install, `pnpm verify`,
+`pnpm test:e2e`, `docker compose config`, and `git diff --check` on 2026-08-17.
+The opt-in live PostgreSQL integration test was not enabled in that follow-up;
+it passed on the immediately preceding license commit, and no runtime behavior
+or database code changed.
 
 The root `dev` path also served the SSR page and non-cacheable liveness endpoint
 while the worker reported `ready`, then reported `stopped` on SIGINT. Database
