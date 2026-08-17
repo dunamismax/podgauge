@@ -182,7 +182,7 @@ The architecture intentionally avoids microservices, Redis, GraphQL, Kubernetes,
 
 See the full [technical specification](docs/spec.md) for the stack decision, PWA behavior, security model, repository boundaries, deployment topology, testing strategy, and implementation sequence.
 
-## Planned repository structure
+## Repository structure
 
 ```text
 apps/web                 SvelteKit web application and API
@@ -193,6 +193,7 @@ packages/card-data       Card ingestion and versioned role overlays
 packages/contracts       Shared schemas and report contracts
 packages/db              Database schema, repositories, and migrations
 packages/ui              PodGauge design system and components
+packages/observability   Logging, tracing, metrics, and redaction boundaries
 analysis/                Calibration and evaluation notebooks
 benchmarks/              Public benchmark manifests and evaluation code
 data/fixtures            Gold-standard and adversarial decks
@@ -200,7 +201,26 @@ docs/                    Product, method, architecture, and operations docs
 infra/                   Compose, Caddy, backup, and deployment assets
 ```
 
-Implementation and local-development commands will be added when the application scaffold lands.
+The first runnable foundation has landed. It serves a minimal SSR application,
+runs a separate graceful worker, enforces package boundaries, and provides a
+loopback-only PostgreSQL 18 development service. It does **not** analyze decks
+yet.
+
+With Node 24.19.0, Corepack, and Docker installed:
+
+```sh
+corepack enable
+corepack pnpm install --frozen-lockfile
+docker compose up -d --wait postgres
+corepack pnpm db:migrate
+corepack pnpm db:seed
+corepack pnpm dev
+```
+
+Run `corepack pnpm verify` for the fast repository gate and
+`corepack pnpm test:e2e` for the cross-browser smoke and accessibility scan.
+See [local development](docs/development.md) for exact prerequisites, all
+commands, troubleshooting, and data-preserving teardown.
 
 ## Roadmap
 

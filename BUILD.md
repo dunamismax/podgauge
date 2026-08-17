@@ -7,7 +7,7 @@ architecture and security blueprint. This file converts those documents into
 ordered, testable work. If they disagree, stop and reconcile the documents in
 the same change before implementing the disputed behavior.
 
-Last reconciled: 2026-08-17 at `6309bf7`.
+Last reconciled: 2026-08-17 for the Phase 1 foundation.
 
 ---
 
@@ -76,13 +76,17 @@ a control, or make a public claim on the owner's behalf.
 
 ## Active handoff
 
-- **Active phase:** Phase 0 — Governance and executable product contract.
-- **Next recommended slice:** complete the owner-independent Phase 0 documents,
-  then scaffold the Phase 1 pnpm workspace and one passing web smoke test.
+- **Active phase:** Phase 2 — Contracts, fixtures, and deterministic
+  serialization. The Phase 0 license choice remains independently blocked.
+- **Next recommended slice:** define branded canonical identifiers and the full
+  deck/revision/version/evidence contracts, then add deterministic serialization
+  and legal/malformed golden fixtures without importing external datasets.
 - **Current blockers:** the software license, production proxy mode, email
-  delivery provider, OCI registry, and off-site backup target require owner
-  choices before their dependent release tasks can close.
-- **Last verified:** documentation-only baseline with `git diff --check`.
+  delivery provider, OCI registry, off-site backup target, and private security
+  contact require owner choices before their dependent release tasks can close.
+- **Last verified:** Node 24.19.0 frozen install; `pnpm verify` including live
+  PostgreSQL integration; cross-browser Playwright/axe smoke; development web,
+  worker, migration, and seed paths; and `docker compose config` on 2026-08-17.
 - **Production state:** no application is deployed; `podgauge.com` is a target,
   not a currently verified service.
 
@@ -93,18 +97,20 @@ requiring archaeology through old commits.
 
 ## Current baseline
 
-Verified in the repository at the reconciliation commit:
+Verified in the repository at the Phase 1 reconciliation:
 
 - [x] `README.md` defines PodGauge's product vision, report concepts, Deckprint,
       Pod Fit, trust model, calibration intent, roadmap, and public disclaimers.
 - [x] `docs/spec.md` defines the modular-monolith architecture, package
       boundaries, security baseline, PWA behavior, deployment topology, tests,
       operations, and initial implementation sequence.
-- [x] The repository is documentation-only: there is no application scaffold,
-      package manifest, lockfile, test suite, database schema, container image,
-      CI workflow, license, or production deployment yet.
+- [x] The pinned Node 24.19.0/pnpm 11.22.0 workspace contains a SvelteKit SSR
+      shell, a separate graceful worker, seven bounded packages, a frozen
+      lockfile, unit/property/component/integration/browser tests, and CI.
+- [x] Development PostgreSQL 18.4 is digest-pinned, loopback-only, healthy under
+      Compose, and accepts the reviewed foundation migration and idempotent seed.
 - [x] `origin` points to GitHub and `codeberg` points to Codeberg; both `main`
-      refs matched `6309bf7` when this tracker was created.
+      refs matched `8869e36` before Phase 1 implementation began.
 - [x] The intended canonical host is `https://podgauge.com`, with
       `https://www.podgauge.com` redirecting to it once deployed.
 
@@ -178,34 +184,34 @@ the blocker text from **Active handoff**, and check the box in the same commit.
 
 Purpose: remove ambiguity that would otherwise be baked into code or data.
 
-- [ ] Add `AGENTS.md` with durable repository rules, package boundaries,
+- [x] Add `AGENTS.md` with durable repository rules, package boundaries,
       verification expectations, generated-file policy, and the checklist and
       dual-remote handoff workflow from this file.
 - [ ] Add the owner-selected `LICENSE`, and make README, contribution, and
       source headers consistent with it without implying rights to third-party
       Magic data or imagery.
-- [ ] Add `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and an initial `SECURITY.md`;
+- [x] Add `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and an initial `SECURITY.md`;
       keep contribution intake closed or clearly provisional until the license
       and private security contact are resolved.
-- [ ] Add `docs/glossary.md` defining every public result, Low/High boundary
+- [x] Add `docs/glossary.md` defining every public result, Low/High boundary
       language, elimination versus table win, evidence, finding, role,
       dependency, shared failure point, version tuple, and confidence.
-- [ ] Add `docs/methodology.md` with the first falsifiable definitions,
+- [x] Add `docs/methodology.md` with the first falsifiable definitions,
       non-goals, invariants, unknown-state behavior, and calibration questions
       for Deckprint, Capability, table fit, volatility, table impact, and
       confidence. Do not invent final weights merely to fill the document.
-- [ ] Add `docs/data-governance.md` with a source-by-source rights and terms
+- [x] Add `docs/data-governance.md` with a source-by-source rights and terms
       matrix, attribution, permitted retention and redistribution, update
       cadence, provenance requirements, deletion process, and review date.
-- [ ] Add `docs/threat-model.md` covering guest abuse, import SSRF, stored XSS,
+- [x] Add `docs/threat-model.md` covering guest abuse, import SSRF, stored XSS,
       CSRF, broken object authorization, job exhaustion, data poisoning, cache
       leakage, secret leakage, backup compromise, and supply-chain threats.
-- [ ] Add an ADR template and record the accepted modular-monolith, PostgreSQL
+- [x] Add an ADR template and record the accepted modular-monolith, PostgreSQL
       job queue, deterministic-engine, REST/OpenAPI, and self-hosted PWA choices
       or explicitly point to the exact normative spec sections.
-- [ ] Define semantic versioning and compatibility rules for the API,
+- [x] Define semantic versioning and compatibility rules for the API,
       report-schema, engine, policy, card-data, benchmark, and simulation model.
-- [ ] Create an initial public-fixture contribution policy with consent,
+- [x] Create an initial public-fixture contribution policy with consent,
       provenance, licensing, anonymization, correction, and removal rules.
 
 **Phase 0 exit:** a contributor can tell what may be built, what evidence is
@@ -219,37 +225,37 @@ may legally enter the repository.
 Purpose: create a boring, reproducible monorepo with a fast default feedback
 loop before product logic spreads across packages.
 
-- [ ] Add a private root `package.json` with Node `>=24`, an exact Corepack
+- [x] Add a private root `package.json` with Node `>=24`, an exact Corepack
       `packageManager` pin, pnpm workspaces, and no floating production versions.
-- [ ] Add `pnpm-workspace.yaml`, a strict shared TypeScript configuration,
+- [x] Add `pnpm-workspace.yaml`, a strict shared TypeScript configuration,
       `.editorconfig`, `.gitattributes`, `.gitignore`, `.npmrc`, a Node-version
       file, and a safe `.env.example`.
-- [ ] Create the specified directories for `apps/web`, `apps/worker`, the seven
+- [x] Create the specified directories for `apps/web`, `apps/worker`, the seven
       packages, `analysis`, `benchmarks`, `data/fixtures`, docs, and infra. Give
       each runtime package an explicit export map and ownership boundary.
-- [ ] Scaffold `apps/web` with Svelte 5, SvelteKit 2, Vite, adapter-node, strict
+- [x] Scaffold `apps/web` with Svelte 5, SvelteKit 2, Vite, adapter-node, strict
       TypeScript, Tailwind CSS 4, semantic design tokens, and a minimal
       mobile-first SSR page.
-- [ ] Scaffold `apps/worker` as a separate graceful Node process with typed
+- [x] Scaffold `apps/worker` as a separate graceful Node process with typed
       startup configuration and no web-framework dependency.
-- [ ] Scaffold pure `contracts`, `engine`, `policy`, and `card-data` packages and
+- [x] Scaffold pure `contracts`, `engine`, `policy`, and `card-data` packages and
       infrastructure-facing `db`, `ui`, and `observability` packages; enforce
       dependency direction with tests or lint rules.
-- [ ] Configure Prettier, ESLint, `svelte-check`, TypeScript checking, Vitest,
+- [x] Configure Prettier, ESLint, `svelte-check`, TypeScript checking, Vitest,
       Testing Library, fast-check, Playwright, and axe-core with one meaningful
       passing smoke test at each installed layer.
-- [ ] Add root scripts for `dev`, `format`, `format:check`, `lint`, `check`,
+- [x] Add root scripts for `dev`, `format`, `format:check`, `lint`, `check`,
       `test`, `test:integration`, `test:e2e`, `build`, `db:generate`,
       `db:migrate`, `db:seed`, `data:sync`, `benchmark`, and one aggregate
       `verify` command.
-- [ ] Add development Compose for PostgreSQL 18 on a private project network
+- [x] Add development Compose for PostgreSQL 18 on a private project network
       with a health check, explicit volume, safe local defaults, and no claim
       that the file is production-ready.
-- [ ] Add CI that installs from the frozen lockfile and runs formatting, lint,
+- [x] Add CI that installs from the frozen lockfile and runs formatting, lint,
       Svelte diagnostics, TypeScript, unit/property tests, a production build,
       and a targeted browser smoke test. Use PostgreSQL where integration tests
       require real database behavior.
-- [ ] Add `docs/development.md` with a clean-clone setup, exact prerequisites,
+- [x] Add `docs/development.md` with a clean-clone setup, exact prerequisites,
       common commands, fixture seeding, troubleshooting, and teardown that does
       not delete user data by default.
 
@@ -741,8 +747,10 @@ only after its prerequisite and acceptance criteria are documented.
 
 ## Known limits not to overclaim
 
-- PodGauge currently has no runnable web app, worker, engine, API, database,
-  PWA, benchmark harness, container image, or production deployment.
+- PodGauge now has a runnable SSR shell, graceful worker, pure foundation
+  packages, and a development PostgreSQL schema. It still has no deck parser,
+  scanner/report engine, public analysis API, Graphile Worker queue, user-data
+  schema, PWA, calibration corpus, release image, or production deployment.
 - The sample report in `README.md` illustrates the intended format and is not a
   result from a live scoring service.
 - No Capability thresholds, Deckprint weights, closing-window model, accuracy
@@ -763,11 +771,34 @@ Remove a limit only in the same verified change that makes it false.
 
 ## Verification
 
-### Documentation-only baseline
+### Always-required baseline
 
 ```sh
 git diff --check
 ```
+
+### Verified Phase 1 foundation
+
+The following passed on 2026-08-17 under Node 24.19.0 and pnpm 11.22.0. The
+integration command ran with `PODGAUGE_RUN_DB_INTEGRATION=1` against the healthy
+development PostgreSQL 18.4 service.
+
+```sh
+corepack pnpm install --frozen-lockfile
+corepack pnpm verify
+corepack pnpm test:e2e
+corepack pnpm --filter @podgauge/worker smoke
+corepack pnpm db:migrate
+corepack pnpm db:seed
+corepack pnpm data:sync
+corepack pnpm benchmark
+docker compose config
+docker compose up -d --wait postgres
+```
+
+The root `dev` path also served the SSR page and non-cacheable liveness endpoint
+while the worker reported `ready`, then reported `stopped` on SIGINT. Database
+seeding was repeated and remained one `development_fixture` row.
 
 ### Required fast gate after Phase 1
 

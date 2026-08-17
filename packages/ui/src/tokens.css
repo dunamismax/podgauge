@@ -1,0 +1,33 @@
+:root {
+  color-scheme: light dark;
+  --color-canvas: oklch(0.975 0.008 165);
+  --color-surface: oklch(0.995 0.004 165);
+  --color-surface-raised: oklch(1 0 0);
+  --color-ink: oklch(0.2 0.025 174);
+  --color-ink-muted: oklch(0.46 0.025 174);
+  --color-border: oklch(0.86 0.018 165);
+  --color-accent: oklch(0.52 0.13 163);
+  --color-accent-strong: oklch(0.39 0.11 163);
+  --color-accent-ink: oklch(0.99 0.005 165);
+  --color-warning: oklch(0.7 0.14 76);
+  --focus-ring: 0 0 0 0.2rem oklch(0.7 0.12 163 / 55%);
+  --radius-small: 0.5rem;
+  --radius-medium: 1rem;
+  --shadow-raised: 0 1rem 3rem oklch(0.2 0.025 174 / 10%);
+  --space-page: clamp(1rem, 4vw, 3rem);
+  --measure-copy: 68ch;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-canvas: oklch(0.16 0.02 174);
+    --color-surface: oklch(0.2 0.022 174);
+    --color-surface-raised: oklch(0.24 0.024 174);
+    --color-ink: oklch(0.94 0.012 165);
+    --color-ink-muted: oklch(0.74 0.02 165);
+    --color-border: oklch(0.36 0.025 174);
+    --color-accent: oklch(0.72 0.13 163);
+    --color-accent-strong: oklch(0.8 0.12 163);
+    --color-accent-ink: oklch(0.16 0.02 174);
+  }
+}

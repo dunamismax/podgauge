@@ -1,0 +1,18 @@
+packages:
+  - apps/*
+  - benchmarks
+  - packages/*
+
+autoInstallPeers: false
+engineStrict: true
+packageManagerStrict: true
+preferFrozenLockfile: true
+saveExact: true
+sharedWorkspaceLockfile: true
+strictPeerDependencies: true
+
+allowBuilds:
+  esbuild: true
+
+overrides:
+  cookie@<0.7.0: 0.7.2

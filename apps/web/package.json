@@ -1,0 +1,28 @@
+{
+  "name": "@podgauge/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./build/index.js"
+  },
+  "scripts": {
+    "build": "vite build",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "dev": "vite dev --host 127.0.0.1",
+    "preview": "node build/index.js",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@podgauge/ui": "workspace:*",
+    "@sveltejs/kit": "2.70.2",
+    "svelte": "5.56.9"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-node": "5.5.7",
+    "@sveltejs/vite-plugin-svelte": "7.3.0",
+    "@tailwindcss/vite": "4.3.3",
+    "tailwindcss": "4.3.3",
+    "vite": "8.2.1"
+  }
+}

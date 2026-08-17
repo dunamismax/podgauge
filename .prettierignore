@@ -1,0 +1,11 @@
+.svelte-kit
+BUILD.md
+README.md
+build
+coverage
+dist
+docs/spec.md
+node_modules
+playwright-report
+pnpm-lock.yaml
+test-results

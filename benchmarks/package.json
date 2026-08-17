@@ -1,0 +1,15 @@
+{
+  "name": "@podgauge/benchmarks",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "benchmark": "pnpm --filter @podgauge/engine build && tsx foundation.ts"
+  },
+  "dependencies": {
+    "@podgauge/engine": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "4.23.12"
+  }
+}
