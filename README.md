@@ -299,4 +299,4 @@ See the [Wizards of the Coast Fan Content Policy](https://company.wizards.com/en
 
 ## License
 
-PodGauge is intended to be released as open-source software. A license will be selected and added before the first source release. Until a `LICENSE` file is present, no license is granted by this repository.
+PodGauge's original software and documentation are licensed under the [MIT License](LICENSE). This license does not grant rights to Wizards of the Coast material, card images, third-party datasets, or contributed fixtures; each such source remains subject to its own reviewed terms, provenance, and permissions.

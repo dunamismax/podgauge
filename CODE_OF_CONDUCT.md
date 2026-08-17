@@ -18,7 +18,8 @@ refer urgent threats to the relevant platform or authorities. Enforcement
 should be proportionate, documented privately, and avoid exposing reporters or
 affected people unnecessarily.
 
-No private conduct contact is configured yet. Until one is published, do not
-send sensitive reports through a public issue. The project is not ready for
-general contribution intake while that reporting path and the software license
-remain unresolved.
+Send sensitive conduct reports privately to
+[dunamismax@tutamail.com](mailto:dunamismax@tutamail.com) rather than through a
+public issue. The address is public, but reports and identifying details should
+remain private. General contribution intake remains provisional until the
+maintainer explicitly opens it.

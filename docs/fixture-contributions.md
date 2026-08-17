@@ -1,8 +1,10 @@
 # Public fixture contribution policy
 
-Public fixture intake is closed until the owner selects a software license and
-explicitly opens contributions. This policy defines the gate; it does not grant
-rights or accept a submission.
+PodGauge's original software and documentation use the MIT License. Public
+fixture intake remains closed until the owner explicitly opens contributions;
+the software license does not grant rights to submitted deck data or other
+third-party material. This policy defines the gate and does not accept a
+submission.
 
 An accepted fixture must include:
 
@@ -24,14 +26,14 @@ and related revisions. Holdout membership and labels must be protected from
 training leakage. Near-duplicate revisions are grouped rather than counted as
 independent evidence.
 
-Correction and removal requests must identify the fixture and requested scope.
-Maintainers acknowledge the request through the eventual private project
-contact, freeze affected publication when warranted, record the decision, and
-remove or correct future distributions promptly. Published Git history and
-expired backups may not be instantly erasable; the intake consent must state
-those limits before acceptance. Removed fixtures are excluded from future
-benchmarks and releases, and derived claims are corrected when materially
-affected.
+Correction and removal requests must identify the fixture and requested scope
+and be sent privately to
+[dunamismax@tutamail.com](mailto:dunamismax@tutamail.com). Maintainers freeze
+affected publication when warranted, record the decision, and remove or
+correct future distributions promptly. Published Git history and expired
+backups may not be instantly erasable; the intake consent must state those
+limits before acceptance. Removed fixtures are excluded from future benchmarks
+and releases, and derived claims are corrected when materially affected.
 
 Fixtures may contain deck text and independently authored labels only. Do not
 commit card images, copied Oracle/card datasets, other products' reports,

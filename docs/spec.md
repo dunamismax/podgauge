@@ -552,19 +552,17 @@ A larger installation can independently scale stateless web containers and worke
 - **No LLM-owned scoring:** language models may assist classification review or explanation, but the score and evidence path remain deterministic and inspectable.
 - **No premature native wrapper:** ship a first-class PWA before considering Tauri or Capacitor. A wrapper is justified only by a proven capability the web platform cannot provide.
 
-## Licensing recommendation
+## Licensing decision
 
-The repository currently grants no license because it has no `LICENSE` file. Before accepting external contributions, choose deliberately:
+The owner selected the **MIT License** on 2026-08-17 for PodGauge's original software and documentation. The full terms are committed in the repository root, and the durable rationale is recorded in [ADR 0002](decisions/0002-mit-license.md). Contribution intake remains provisional until explicitly opened.
 
-- **AGPL-3.0-or-later** if hosted modifications should remain available to their users;
-- **Apache-2.0** if maximum adoption and explicit patent terms matter more than network copyleft.
-
-Keep third-party card data, card images, benchmark submissions, project source, and documentation under clearly separated terms. The software license cannot grant rights to Wizards of the Coast material or third-party datasets.
+Keep third-party card data, card images, benchmark submissions, project source, and documentation under clearly separated terms. The MIT License cannot grant rights to Wizards of the Coast material, third-party datasets, or contributor-submitted fixtures; those require their own reviewed terms, provenance, and permissions.
 
 ## Research basis
 
 This decision was checked against current primary documentation on 2026-08-17:
 
+- [Open Source Initiative MIT License text](https://opensource.org/license/mit).
 - [Svelte and SvelteKit overview](https://svelte.dev/docs/kit/introduction), including SSR, code splitting, offline support, and Vite-based development.
 - [SvelteKit Node deployment](https://svelte.dev/docs/kit/adapter-node), including proxy trust, body limits, and graceful shutdown.
 - [SvelteKit service workers](https://svelte.dev/docs/kit/service-workers) and [SvelteKit CSP/CSRF configuration](https://svelte.dev/docs/kit/configuration#csp).

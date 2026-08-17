@@ -7,7 +7,8 @@ architecture and security blueprint. This file converts those documents into
 ordered, testable work. If they disagree, stop and reconcile the documents in
 the same change before implementing the disputed behavior.
 
-Last reconciled: 2026-08-17 for the Phase 1 foundation.
+Last reconciled: 2026-08-17 after the MIT license and private-reporting owner
+decisions.
 
 ---
 
@@ -77,13 +78,13 @@ a control, or make a public claim on the owner's behalf.
 ## Active handoff
 
 - **Active phase:** Phase 2 — Contracts, fixtures, and deterministic
-  serialization. The Phase 0 license choice remains independently blocked.
+  serialization. All owner-independent Phase 0 and Phase 1 work is complete.
 - **Next recommended slice:** define branded canonical identifiers and the full
   deck/revision/version/evidence contracts, then add deterministic serialization
   and legal/malformed golden fixtures without importing external datasets.
-- **Current blockers:** the software license, production proxy mode, email
-  delivery provider, OCI registry, off-site backup target, and private security
-  contact require owner choices before their dependent release tasks can close.
+- **Current blockers:** the production proxy mode, transactional email delivery
+  provider, OCI registry, and off-site backup target require owner choices
+  before their dependent release tasks can close.
 - **Last verified:** Node 24.19.0 frozen install; `pnpm verify` including live
   PostgreSQL integration; cross-browser Playwright/axe smoke; development web,
   worker, migration, and seed paths; and `docker compose config` on 2026-08-17.
@@ -97,7 +98,7 @@ requiring archaeology through old commits.
 
 ## Current baseline
 
-Verified in the repository at the Phase 1 reconciliation:
+Verified in the repository at the current reconciliation:
 
 - [x] `README.md` defines PodGauge's product vision, report concepts, Deckprint,
       Pod Fit, trust model, calibration intent, roadmap, and public disclaimers.
@@ -109,6 +110,10 @@ Verified in the repository at the Phase 1 reconciliation:
       lockfile, unit/property/component/integration/browser tests, and CI.
 - [x] Development PostgreSQL 18.4 is digest-pinned, loopback-only, healthy under
       Compose, and accepts the reviewed foundation migration and idempotent seed.
+- [x] PodGauge's original software and documentation use the MIT License;
+      third-party Magic material and fixtures remain outside that grant.
+- [x] `SECURITY.md` publishes `dunamismax@tutamail.com` for private vulnerability
+      reports without claiming a supported release or response-time SLA.
 - [x] `origin` points to GitHub and `codeberg` points to Codeberg; both `main`
       refs matched `8869e36` before Phase 1 implementation began.
 - [x] The intended canonical host is `https://podgauge.com`, with
@@ -160,9 +165,8 @@ Every phase must preserve these constraints:
 These are decision gates, not permission for an agent to guess. They block only
 their dependent work.
 
-- [ ] **License:** owner selects AGPL-3.0-or-later or Apache-2.0 (or supplies a
-      different approved license) before outside contributions or source
-      releases are accepted.
+- [x] **License:** owner selected MIT on 2026-08-17. The decision is implemented
+      in `LICENSE`, package metadata, public policy, and ADR 0002.
 - [ ] **Production network:** owner selects DNS-only or Cloudflare-proxied mode.
       Document proxy trust and origin restrictions before trusting forwarded
       client-address headers.
@@ -172,8 +176,9 @@ their dependent work.
       release-image publication is enabled.
 - [ ] **Backup destination:** owner selects a separately credentialed off-site
       restic target and retention requirements before production launch.
-- [ ] **Private security contact:** owner supplies a non-public vulnerability
-      reporting route before `SECURITY.md` is declared release-ready.
+- [x] **Private security reporting:** owner selected direct email to
+      `dunamismax@tutamail.com`. The address is public while report contents are
+      sent privately; `SECURITY.md` records the pre-alpha support limits.
 
 Record accepted decisions in an ADR or the relevant operations document, remove
 the blocker text from **Active handoff**, and check the box in the same commit.
@@ -187,12 +192,12 @@ Purpose: remove ambiguity that would otherwise be baked into code or data.
 - [x] Add `AGENTS.md` with durable repository rules, package boundaries,
       verification expectations, generated-file policy, and the checklist and
       dual-remote handoff workflow from this file.
-- [ ] Add the owner-selected `LICENSE`, and make README, contribution, and
+- [x] Add the owner-selected `LICENSE`, and make README, contribution, and
       source headers consistent with it without implying rights to third-party
       Magic data or imagery.
 - [x] Add `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and an initial `SECURITY.md`;
-      keep contribution intake closed or clearly provisional until the license
-      and private security contact are resolved.
+      keep contribution intake closed or clearly provisional until explicitly
+      opened, and publish private security and conduct-reporting routes.
 - [x] Add `docs/glossary.md` defining every public result, Low/High boundary
       language, elimination versus table win, evidence, finding, role,
       dependency, shared failure point, version tuple, and confidence.
@@ -758,8 +763,9 @@ only after its prerequisite and acceptance criteria are documented.
 - No third-party data import is approved merely because a source is named in
   the README or specification. Terms and attribution must be rechecked at
   implementation time.
-- No software license is granted until the owner selects and commits a
-  `LICENSE` file.
+- The MIT License covers PodGauge's original software and documentation only.
+  It does not grant rights to third-party Magic data, imagery, datasets, or
+  contributed fixtures.
 - Ownership of `podgauge.com` does not prove DNS, TLS, proxy, email, backup, or
   application deployment is configured.
 - Dual Git remotes are mirrors of source history, not backups of production
@@ -777,9 +783,10 @@ Remove a limit only in the same verified change that makes it false.
 git diff --check
 ```
 
-### Verified Phase 1 foundation
+### Verified Phase 1 foundation and governance reconciliation
 
-The following passed on 2026-08-17 under Node 24.19.0 and pnpm 11.22.0. The
+The following passed on 2026-08-17 under Node 24.19.0 and pnpm 11.22.0 and were
+rerun after the MIT and private-reporting decisions were implemented. The
 integration command ran with `PODGAUGE_RUN_DB_INTEGRATION=1` against the healthy
 development PostgreSQL 18.4 service.
 
