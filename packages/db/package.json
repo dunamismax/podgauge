@@ -7,11 +7,16 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./dist/index.js"
+    },
+    "./roles": {
+      "types": "./src/roles.ts",
+      "default": "./dist/roles.js"
     }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
+    "db:roles": "pnpm --filter @podgauge/config build && tsx src/bootstrap-roles.ts",
     "db:generate": "pnpm --filter @podgauge/config build && drizzle-kit generate --config drizzle.config.ts",
     "db:migrate": "pnpm --filter @podgauge/config build && tsx src/migrate.ts",
     "db:seed": "pnpm --filter @podgauge/config build && tsx src/seed.ts"
@@ -24,6 +29,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "12.1.0",
     "drizzle-kit": "0.31.10",
     "tsx": "4.23.12"
   }

@@ -8,17 +8,28 @@ import {
   type AnalysisProgressEvent,
   type DeckRevision,
 } from '@podgauge/contracts';
-import { readTestConfiguration } from '@podgauge/config';
+import { databaseRoleNames, type DatabaseRole } from '@podgauge/config';
+import {
+  PostgreSqlContainer,
+  type StartedPostgreSqlContainer,
+} from '@testcontainers/postgresql';
 import { eq } from 'drizzle-orm';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { fileURLToPath } from 'node:url';
 import { createHash, randomUUID } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import postgres, { type Sql } from 'postgres';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { PodGaugeRepository } from './repository.js';
+import {
+  applyRuntimeGrants,
+  databaseUrlForRole,
+  installDatabaseRoles,
+} from './roles.js';
 import {
   analyses,
   analysisEvents,
@@ -33,13 +44,32 @@ import {
 } from './schema.js';
 import * as schema from './schema.js';
 
-const testConfiguration = readTestConfiguration(process.env);
-const databaseDescribe = testConfiguration.runDatabaseIntegration
-  ? describe
-  : describe.skip;
+const databaseDescribe =
+  process.env.PODGAUGE_RUN_DB_INTEGRATION === '1' ? describe : describe.skip;
+const postgresImage =
+  'postgres:18.4@sha256:f7ce845ee6873dd84be93c9828fe0d1fab0f9707dc9ac569694657398b290bce';
+const testAdminPassword = 'podgauge-test-admin-only';
+const testRolePasswords = {
+  backup: 'podgauge-test-backup-only',
+  migration: 'podgauge-test-migration-only',
+  web: 'podgauge-test-web-only-value',
+  worker: 'podgauge-test-worker-only',
+} as const satisfies Record<DatabaseRole, string>;
 const timestamp = '2026-08-17T12:00:00.000Z';
 const hash = (digit: string) => digit.repeat(64);
 const canonicalId = (prefix: string) => `${prefix}_${randomUUID()}`;
+
+function collectIndexNames(value: unknown, names = new Set<string>()) {
+  if (Array.isArray(value)) {
+    for (const entry of value) collectIndexNames(entry, names);
+  } else if (value !== null && typeof value === 'object') {
+    for (const [key, entry] of Object.entries(value)) {
+      if (key === 'Index Name' && typeof entry === 'string') names.add(entry);
+      collectIndexNames(entry, names);
+    }
+  }
+  return names;
+}
 
 const deckCases = JSON.parse(
   await readFile(
@@ -78,6 +108,10 @@ const reportFixture = AnalysisReportSchema.parse(
 );
 
 type Scenario = ReturnType<typeof createScenario>;
+type Repositories = Readonly<{
+  web: PodGaugeRepository;
+  worker: PodGaugeRepository;
+}>;
 
 function createScenario() {
   const scenarioNonce = randomUUID();
@@ -206,18 +240,18 @@ function queuedEvent(scenario: Scenario, sequence = 0): AnalysisProgressEvent {
 }
 
 async function insertScenario(
-  repository: PodGaugeRepository,
+  repositories: Repositories,
   scenario: Scenario,
   includeAnalysis = true,
 ) {
-  await repository.insertVersionSet(scenario.versionSet);
-  await repository.insertOwnedDeckRevision({
+  await repositories.worker.insertVersionSet(scenario.versionSet);
+  await repositories.web.insertOwnedDeckRevision({
     deck: scenario.deck,
     owner: scenario.owner,
     revision: scenario.revision,
   });
   if (includeAnalysis) {
-    await repository.createAnalysisFromJob({
+    await repositories.web.createAnalysisFromJob({
       owner: scenario.owner,
       payload: scenario.payload,
     });
@@ -227,33 +261,96 @@ async function insertScenario(
 databaseDescribe('Phase 3 PostgreSQL schema and constraints', () => {
   let adminSql: Sql;
   let databaseSql: Sql;
+  let webDatabaseSql: Sql;
+  let workerDatabaseSql: Sql;
   let database: PostgresJsDatabase<typeof schema>;
-  let repository: PodGaugeRepository;
-  let databaseName: string;
+  let repositories: Repositories;
+  let container: StartedPostgreSqlContainer;
+  let adminDatabaseUrl: string;
+  let firstMigrationTableNames: string[];
+
+  const roleUrl = (role: DatabaseRole) =>
+    databaseUrlForRole(adminDatabaseUrl, role, testRolePasswords[role]);
+
+  const connectAs = (role: DatabaseRole) => postgres(roleUrl(role), { max: 1 });
 
   beforeAll(async () => {
-    databaseName = `podgauge_test_${randomUUID().replaceAll('-', '')}`;
-    const adminUrl = new URL(testConfiguration.databaseUrl.reveal());
-    adminUrl.pathname = '/postgres';
-    adminSql = postgres(adminUrl.href, { max: 1 });
-    await adminSql`create database ${adminSql(databaseName)}`;
+    container = await new PostgreSqlContainer(postgresImage)
+      .withDatabase('podgauge')
+      .withUsername('podgauge_test_admin')
+      .withPassword(testAdminPassword)
+      .start();
+    adminDatabaseUrl = container.getConnectionUri();
 
-    const databaseUrl = new URL(testConfiguration.databaseUrl.reveal());
-    databaseUrl.pathname = `/${databaseName}`;
-    databaseSql = postgres(databaseUrl.href, { max: 8 });
+    const bootstrapEnvironment = {
+      NODE_ENV: 'test',
+      PODGAUGE_BACKUP_DATABASE_PASSWORD: testRolePasswords.backup,
+      PODGAUGE_MIGRATION_DATABASE_PASSWORD: testRolePasswords.migration,
+      PODGAUGE_ROLE_BOOTSTRAP_DATABASE_URL: adminDatabaseUrl,
+      PODGAUGE_WEB_DATABASE_PASSWORD: testRolePasswords.web,
+      PODGAUGE_WORKER_DATABASE_PASSWORD: testRolePasswords.worker,
+    } as const;
+    await installDatabaseRoles(bootstrapEnvironment);
+
+    adminSql = postgres(adminDatabaseUrl, { max: 1 });
+    databaseSql = postgres(roleUrl('migration'), { max: 1 });
     database = drizzle(databaseSql, { schema });
-    await migrate(database, {
-      migrationsFolder: fileURLToPath(
-        new URL('../migrations', import.meta.url),
-      ),
-    });
-    repository = new PodGaugeRepository(database);
-  }, 30_000);
+    const migrationsDirectory = fileURLToPath(
+      new URL('../migrations', import.meta.url),
+    );
+    const temporaryMigrations = await mkdtemp(
+      join(tmpdir(), 'podgauge-forward-migrations-'),
+    );
+    await mkdir(join(temporaryMigrations, 'meta'));
+    const journal = JSON.parse(
+      await readFile(join(migrationsDirectory, 'meta/_journal.json'), 'utf8'),
+    ) as { entries: Array<Record<string, unknown>> };
+    const firstEntry = journal.entries[0];
+    if (!firstEntry || typeof firstEntry.tag !== 'string') {
+      throw new Error('The first reviewed migration journal entry is missing');
+    }
+    await writeFile(
+      join(temporaryMigrations, 'meta/_journal.json'),
+      `${JSON.stringify({ ...journal, entries: [firstEntry] }, null, 2)}\n`,
+    );
+    await writeFile(
+      join(temporaryMigrations, `${firstEntry.tag}.sql`),
+      await readFile(join(migrationsDirectory, `${firstEntry.tag}.sql`)),
+    );
+
+    try {
+      await migrate(database, { migrationsFolder: temporaryMigrations });
+      firstMigrationTableNames = (
+        await databaseSql<{ table_name: string }[]>`
+          select table_name
+          from information_schema.tables
+          where table_schema = 'public' and table_type = 'BASE TABLE'
+          order by table_name
+        `
+      ).map((row) => row.table_name);
+      await migrate(database, { migrationsFolder: migrationsDirectory });
+    } finally {
+      await rm(temporaryMigrations, { force: true, recursive: true });
+    }
+    await applyRuntimeGrants(databaseSql);
+
+    // Exercise the documented existing-volume repair path after objects exist.
+    await installDatabaseRoles(bootstrapEnvironment);
+    await applyRuntimeGrants(databaseSql);
+    webDatabaseSql = postgres(roleUrl('web'), { max: 8 });
+    workerDatabaseSql = postgres(roleUrl('worker'), { max: 8 });
+    repositories = {
+      web: new PodGaugeRepository(drizzle(webDatabaseSql, { schema })),
+      worker: new PodGaugeRepository(drizzle(workerDatabaseSql, { schema })),
+    };
+  }, 120_000);
 
   afterAll(async () => {
-    await databaseSql.end();
-    await adminSql`drop database ${adminSql(databaseName)} with (force)`;
-    await adminSql.end();
+    await databaseSql?.end();
+    await webDatabaseSql?.end();
+    await workerDatabaseSql?.end();
+    await adminSql?.end();
+    await container?.stop();
   });
 
   it('applies a clean migration with every durable core table', async () => {
@@ -288,12 +385,174 @@ databaseDescribe('Phase 3 PostgreSQL schema and constraints', () => {
       'system_metadata',
       'users',
     ]);
+    expect(firstMigrationTableNames).toEqual(['system_metadata']);
+
+    const migrations = await databaseSql<{ count: number }[]>`
+      select count(*)::integer as count from drizzle.__drizzle_migrations
+    `;
+    expect(migrations[0]?.count).toBe(2);
+  });
+
+  it('keeps every application login non-elevated and membership-free', async () => {
+    const roleNames = Object.values(databaseRoleNames);
+    const roles = await adminSql<
+      Array<{
+        rolbypassrls: boolean;
+        rolcanlogin: boolean;
+        rolcreatedb: boolean;
+        rolcreaterole: boolean;
+        rolinherit: boolean;
+        rolname: string;
+        rolreplication: boolean;
+        rolsuper: boolean;
+      }>
+    >`
+      select
+        rolname,
+        rolcanlogin,
+        rolsuper,
+        rolcreatedb,
+        rolcreaterole,
+        rolinherit,
+        rolreplication,
+        rolbypassrls
+      from pg_roles
+      where rolname = any(${roleNames})
+      order by rolname
+    `;
+
+    expect(roles.map((role) => role.rolname)).toEqual([...roleNames].sort());
+    for (const role of roles) {
+      expect(role).toMatchObject({
+        rolbypassrls: false,
+        rolcanlogin: true,
+        rolcreatedb: false,
+        rolcreaterole: false,
+        rolinherit: false,
+        rolreplication: false,
+        rolsuper: false,
+      });
+    }
+
+    const memberships = await adminSql<{ count: number }[]>`
+      select count(*)::integer as count
+      from pg_auth_members
+      where member in (select oid from pg_roles where rolname = any(${roleNames}))
+    `;
+    expect(memberships[0]?.count).toBe(0);
+  });
+
+  it('allows representative web, worker, migration, and backup operations', async () => {
+    const webSql = connectAs('web');
+    const workerSql = connectAs('worker');
+    const backupSql = connectAs('backup');
+    try {
+      const [webUser] = await webSql<{ user_id: string }[]>`
+        insert into users (email)
+        values (${`${randomUUID()}@example.invalid`})
+        returning user_id
+      `;
+      const deckId = canonicalId('deck');
+      await webSql`
+        insert into decks (deck_id, owner_user_id, title)
+        values (${deckId}, ${webUser!.user_id}, 'Role boundary deck')
+      `;
+
+      const sourceSyncKey = `source-sync-${randomUUID()}`;
+      await workerSql`
+        insert into source_sync_runs (source_name, idempotency_key, summary)
+        values ('development-fixture', ${sourceSyncKey}, '{}'::jsonb)
+      `;
+      const workerRows = await workerSql<{ count: number }[]>`
+        select count(*)::integer as count from source_sync_runs
+        where idempotency_key = ${sourceSyncKey}
+      `;
+      expect(workerRows[0]?.count).toBe(1);
+
+      const backupRows = await backupSql<{ count: number }[]>`
+        select count(*)::integer as count from decks where deck_id = ${deckId}
+      `;
+      expect(backupRows[0]?.count).toBe(1);
+
+      await databaseSql`create schema role_migration_probe`;
+      await databaseSql`
+        create table role_migration_probe.probe (id integer primary key)
+      `;
+      await databaseSql`
+        create function role_migration_probe.answer() returns integer
+        language sql immutable as 'select 42'
+      `;
+      const [answer] = await databaseSql<{ answer: number }[]>`
+        select role_migration_probe.answer() as answer
+      `;
+      expect(answer?.answer).toBe(42);
+    } finally {
+      await databaseSql`drop schema if exists role_migration_probe cascade`;
+      await webSql.end();
+      await workerSql.end();
+      await backupSql.end();
+    }
+  });
+
+  it('denies runtime DDL and keeps the backup login read-only', async () => {
+    for (const role of ['web', 'worker', 'backup'] as const) {
+      const runtimeSql = connectAs(role);
+      try {
+        await expect(
+          runtimeSql.unsafe(`create schema ${role}_forbidden_schema`),
+        ).rejects.toMatchObject({ code: '42501' });
+        await expect(
+          runtimeSql.unsafe(
+            `create table public.${role}_forbidden_table (id integer)`,
+          ),
+        ).rejects.toMatchObject({ code: '42501' });
+        await expect(
+          runtimeSql.unsafe(
+            `create function public.${role}_forbidden_function() returns integer language sql as 'select 1'`,
+          ),
+        ).rejects.toMatchObject({ code: '42501' });
+        await expect(
+          runtimeSql.unsafe('create extension pg_trgm'),
+        ).rejects.toMatchObject({ code: '42501' });
+        await expect(
+          runtimeSql.unsafe(`create role ${role}_forbidden_role`),
+        ).rejects.toMatchObject({ code: '42501' });
+        await expect(
+          runtimeSql.unsafe(
+            'alter table public.system_metadata add column forbidden integer',
+          ),
+        ).rejects.toMatchObject({ code: '42501' });
+        await expect(
+          runtimeSql.unsafe('drop table public.system_metadata'),
+        ).rejects.toMatchObject({ code: '42501' });
+      } finally {
+        await runtimeSql.end();
+      }
+    }
+
+    const backupSql = connectAs('backup');
+    try {
+      await expect(
+        backupSql`
+          insert into system_metadata (key, value)
+          values ('forbidden-backup-write', 'no')
+        `,
+      ).rejects.toMatchObject({ code: '42501' });
+      await expect(
+        backupSql`
+          update system_metadata set value = 'no'
+          where key = 'forbidden-backup-write'
+        `,
+      ).rejects.toMatchObject({ code: '42501' });
+    } finally {
+      await backupSql.end();
+    }
   });
 
   it('validates serialized contracts before persisting representative records', async () => {
     const scenario = createScenario();
-    await insertScenario(repository, scenario);
-    await repository.appendAnalysisEvent(queuedEvent(scenario));
+    await insertScenario(repositories, scenario);
+    await repositories.worker.appendAnalysisEvent(queuedEvent(scenario));
 
     const [stored] = await databaseSql<
       { analysis_id: string; sequence: number; visibility: string }[]
@@ -309,17 +568,17 @@ databaseDescribe('Phase 3 PostgreSQL schema and constraints', () => {
       visibility: 'private',
     });
 
-    await expect(repository.createAnalysisFromJob({})).rejects.toMatchObject({
-      name: 'ZodError',
-    });
+    await expect(
+      repositories.web.createAnalysisFromJob({}),
+    ).rejects.toMatchObject({ name: 'ZodError' });
   });
 
   it('enforces ownership, complete version references, and concurrent idempotency', async () => {
     const scenario = createScenario();
-    await insertScenario(repository, scenario, false);
+    await insertScenario(repositories, scenario, false);
 
     await expect(
-      repository.createAnalysisFromJob({
+      repositories.web.createAnalysisFromJob({
         owner: { guestId: randomUUID(), kind: 'guest' },
         payload: scenario.payload,
       }),
@@ -341,7 +600,7 @@ databaseDescribe('Phase 3 PostgreSQL schema and constraints', () => {
       jobId: canonicalId('job'),
     });
     await expect(
-      repository.createAnalysisFromJob({
+      repositories.web.createAnalysisFromJob({
         owner: scenario.owner,
         payload: missingVersionPayload,
       }),
@@ -354,11 +613,11 @@ databaseDescribe('Phase 3 PostgreSQL schema and constraints', () => {
       jobId: canonicalId('job'),
     });
     const attempts = await Promise.allSettled([
-      repository.createAnalysisFromJob({
+      repositories.web.createAnalysisFromJob({
         owner: scenario.owner,
         payload: first,
       }),
-      repository.createAnalysisFromJob({
+      repositories.web.createAnalysisFromJob({
         owner: scenario.owner,
         payload: second,
       }),
@@ -386,9 +645,9 @@ databaseDescribe('Phase 3 PostgreSQL schema and constraints', () => {
 
   it('enforces monotonic events, valid transitions, and immutable completed reports', async () => {
     const scenario = createScenario();
-    await insertScenario(repository, scenario);
+    await insertScenario(repositories, scenario);
     const initialEvent = queuedEvent(scenario);
-    await repository.appendAnalysisEvent(initialEvent);
+    await repositories.worker.appendAnalysisEvent(initialEvent);
 
     await expect(
       database.update(analyses).set({ state: 'retrying' }).where(
@@ -399,7 +658,7 @@ databaseDescribe('Phase 3 PostgreSQL schema and constraints', () => {
 
     const skippedEvent = queuedEvent(scenario, 2);
     await expect(
-      repository.appendAnalysisEvent(skippedEvent),
+      repositories.worker.appendAnalysisEvent(skippedEvent),
     ).rejects.toMatchObject({ cause: { code: '23514' } });
 
     await databaseSql`
@@ -414,7 +673,7 @@ databaseDescribe('Phase 3 PostgreSQL schema and constraints', () => {
       stage: 'analyzing',
       state: 'running',
     };
-    await repository.appendAnalysisEvent(runningEvent);
+    await repositories.worker.appendAnalysisEvent(runningEvent);
     await expect(
       databaseSql`
         update analysis_events set state = 'retrying'
@@ -443,7 +702,7 @@ databaseDescribe('Phase 3 PostgreSQL schema and constraints', () => {
       sequence: 2,
       state: 'completed',
     };
-    await repository.appendAnalysisEvent(completeEvent);
+    await repositories.worker.appendAnalysisEvent(completeEvent);
     const mismatchedReport = AnalysisReportSchema.parse({
       ...report,
       context: {
@@ -458,9 +717,9 @@ databaseDescribe('Phase 3 PostgreSQL schema and constraints', () => {
       },
     });
     await expect(
-      repository.completeAnalysis(mismatchedReport, reportHash),
+      repositories.worker.completeAnalysis(mismatchedReport, reportHash),
     ).rejects.toMatchObject({ cause: { code: '23514' } });
-    await repository.completeAnalysis(report, reportHash);
+    await repositories.worker.completeAnalysis(report, reportHash);
 
     await expect(
       databaseSql`
@@ -507,7 +766,7 @@ databaseDescribe('Phase 3 PostgreSQL schema and constraints', () => {
 
   it('rejects mutable revisions, incomplete provenance, and invalid pod/source/session states', async () => {
     const scenario = createScenario();
-    await insertScenario(repository, scenario, false);
+    await insertScenario(repositories, scenario, false);
 
     await expect(
       databaseSql`
@@ -629,7 +888,7 @@ databaseDescribe('Phase 3 PostgreSQL schema and constraints', () => {
 
   it('keeps event ordering bounded at the database boundary', async () => {
     const scenario = createScenario();
-    await insertScenario(repository, scenario);
+    await insertScenario(repositories, scenario);
     const event = queuedEvent(scenario);
 
     await expect(
@@ -646,12 +905,12 @@ databaseDescribe('Phase 3 PostgreSQL schema and constraints', () => {
 
   it('serializes concurrent event writers without duplicate or skipped sequences', async () => {
     const scenario = createScenario();
-    await insertScenario(repository, scenario);
-    await repository.appendAnalysisEvent(queuedEvent(scenario));
+    await insertScenario(repositories, scenario);
+    await repositories.worker.appendAnalysisEvent(queuedEvent(scenario));
 
     const attempts = await Promise.allSettled([
-      repository.appendAnalysisEvent(queuedEvent(scenario, 1)),
-      repository.appendAnalysisEvent(queuedEvent(scenario, 1)),
+      repositories.worker.appendAnalysisEvent(queuedEvent(scenario, 1)),
+      repositories.worker.appendAnalysisEvent(queuedEvent(scenario, 1)),
     ]);
     expect(attempts.map((attempt) => attempt.status).sort()).toEqual([
       'fulfilled',
@@ -670,5 +929,52 @@ databaseDescribe('Phase 3 PostgreSQL schema and constraints', () => {
       order by sequence
     `;
     expect(sequences).toEqual([{ sequence: 0 }, { sequence: 1 }]);
+  });
+
+  it('uses the intended indexes for idempotency and reconnect access paths', async () => {
+    const scenario = createScenario();
+    await insertScenario(repositories, scenario);
+    await repositories.worker.appendAnalysisEvent(queuedEvent(scenario));
+    await Promise.all(
+      Array.from({ length: 24 }, async () => {
+        const payload = AnalyzeDeckJobPayloadSchema.parse({
+          ...scenario.payload,
+          analysisId: canonicalId('analysis'),
+          idempotencyKey: `analysis-${randomUUID()}`,
+          jobId: canonicalId('job'),
+        });
+        await repositories.web.createAnalysisFromJob({
+          owner: scenario.owner,
+          payload,
+        });
+      }),
+    );
+    await databaseSql`analyze analyses`;
+    await databaseSql`analyze analysis_events`;
+
+    const plans = await databaseSql.begin(async (transaction) => {
+      await transaction`set local enable_seqscan = off`;
+      const idempotencyPlan = await transaction`
+        explain (format json, costs off)
+        select analysis_id from analyses
+        where owner_guest_id = ${scenario.owner.guestId}
+          and idempotency_key = ${scenario.payload.idempotencyKey}
+      `;
+      const reconnectPlan = await transaction`
+        explain (format json, costs off)
+        select event_id, sequence from analysis_events
+        where analysis_id = ${scenario.payload.analysisId} and sequence >= 0
+        order by sequence
+        limit 100
+      `;
+      return { idempotencyPlan, reconnectPlan };
+    });
+
+    expect([...collectIndexNames(plans.idempotencyPlan)]).toContain(
+      'analyses_guest_idempotency_unique',
+    );
+    expect([...collectIndexNames(plans.reconnectPlan)]).toContain(
+      'analysis_events_reconnect_index',
+    );
   });
 });

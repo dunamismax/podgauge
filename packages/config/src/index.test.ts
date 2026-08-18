@@ -4,21 +4,27 @@ import { describe, expect, it } from 'vitest';
 
 import {
   ConfigurationError,
-  localDevelopmentDatabaseUrl,
+  databaseRoleNames,
+  localDevelopmentDatabaseUrls,
+  readBackupConfiguration,
   readMigrationConfiguration,
+  readRoleBootstrapConfiguration,
   readTestConfiguration,
   readWebConfiguration,
   readWorkerConfiguration,
 } from './index.js';
 
 const productionDatabaseUrl =
-  'postgres://podgauge_runtime:production-secret@postgres/podgauge';
+  'postgres://podgauge_web:production-secret-value@postgres/podgauge';
+const productionMigrationDatabaseUrl =
+  'postgres://podgauge_migration:production-secret-value@postgres/podgauge';
 
 describe('server-only configuration', () => {
   it('uses only documented safe development defaults', () => {
     const web = readWebConfiguration({});
     const worker = readWorkerConfiguration({});
     const migration = readMigrationConfiguration({});
+    const backup = readBackupConfiguration({});
 
     expect(web).toMatchObject({
       bodySizeLimitBytes: 256 * 1_024,
@@ -31,14 +37,29 @@ describe('server-only configuration', () => {
     expect(worker).toMatchObject({
       concurrency: 1,
       environment: 'development',
+      jobTimeoutSeconds: 300,
       runtime: 'worker',
     });
     expect(migration).toMatchObject({
+      databaseRole: 'migration',
       environment: 'development',
       maxConnections: 1,
       runtime: 'migration',
     });
-    expect(migration.databaseUrl.reveal()).toBe(localDevelopmentDatabaseUrl);
+    expect(backup).toMatchObject({
+      databaseRole: 'backup',
+      environment: 'development',
+      runtime: 'backup',
+    });
+    expect(migration.databaseUrl.reveal()).toBe(
+      localDevelopmentDatabaseUrls.migration,
+    );
+    expect(new URL(web.databaseUrl.reveal()).username).toBe(
+      databaseRoleNames.web,
+    );
+    expect(new URL(worker.databaseUrl.reveal()).username).toBe(
+      databaseRoleNames.worker,
+    );
   });
 
   it('accepts complete production settings without making proxy decisions', () => {
@@ -55,6 +76,17 @@ describe('server-only configuration', () => {
 
     expect(configuration.origin.href).toBe('https://podgauge.com/');
     expect(configuration.databaseUrl.reveal()).toBe(productionDatabaseUrl);
+  });
+
+  it('validates an explicit admin-only role bootstrap without exposing passwords', () => {
+    const configuration = readRoleBootstrapConfiguration({});
+
+    expect(configuration).toMatchObject({
+      environment: 'development',
+      runtime: 'role-bootstrap',
+    });
+    expect(JSON.stringify(configuration)).not.toContain('dev_only');
+    expect(String(configuration.passwords.web)).toBe('[REDACTED]');
   });
 
   it('requires explicit deterministic test settings', () => {
@@ -91,10 +123,38 @@ describe('server-only configuration', () => {
     );
     expect(() =>
       readMigrationConfiguration({
-        DATABASE_URL: localDevelopmentDatabaseUrl,
+        DATABASE_URL: localDevelopmentDatabaseUrls.migration,
         NODE_ENV: 'production',
       }),
     ).toThrow(/local credentials/u);
+  });
+
+  it('rejects a credential intended for a different database role', () => {
+    expect(() =>
+      readWorkerConfiguration({
+        DATABASE_URL: localDevelopmentDatabaseUrls.web,
+      }),
+    ).toThrow(/podgauge_worker role/u);
+    expect(() =>
+      readBackupConfiguration({
+        DATABASE_URL: localDevelopmentDatabaseUrls.migration,
+      }),
+    ).toThrow(/podgauge_backup role/u);
+    expect(() =>
+      readRoleBootstrapConfiguration({
+        PODGAUGE_ROLE_BOOTSTRAP_DATABASE_URL: localDevelopmentDatabaseUrls.web,
+      }),
+    ).toThrow(/cannot use an application role/u);
+  });
+
+  it('requires every role-bootstrap credential in production', () => {
+    expect(() =>
+      readRoleBootstrapConfiguration({
+        NODE_ENV: 'production',
+        PODGAUGE_ROLE_BOOTSTRAP_DATABASE_URL:
+          'postgres://cluster_admin:production-admin-secret@postgres/podgauge',
+      }),
+    ).toThrow(/PODGAUGE_BACKUP_DATABASE_PASSWORD is required/u);
   });
 
   it('rejects unsupported worker concurrency and cross-mode settings', () => {
@@ -102,13 +162,16 @@ describe('server-only configuration', () => {
       readWorkerConfiguration({ PODGAUGE_WORKER_CONCURRENCY: '2' }),
     ).toThrow(/PODGAUGE_WORKER_CONCURRENCY/u);
     expect(() =>
+      readWorkerConfiguration({ PODGAUGE_WORKER_JOB_TIMEOUT_SECONDS: '0' }),
+    ).toThrow(/PODGAUGE_WORKER_JOB_TIMEOUT_SECONDS/u);
+    expect(() =>
       readWebConfiguration({ PODGAUGE_WORKER_CONCURRENCY: '1' }),
     ).toThrow(/belongs to worker configuration/u);
   });
 
   it('keeps credential-bearing values redacted by default', () => {
     const secret = readMigrationConfiguration({
-      DATABASE_URL: productionDatabaseUrl,
+      DATABASE_URL: productionMigrationDatabaseUrl,
     }).databaseUrl;
 
     expect(String(secret)).toBe('[REDACTED]');

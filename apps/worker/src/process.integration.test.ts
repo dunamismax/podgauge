@@ -13,6 +13,8 @@ describe('worker process', () => {
           {
             env: {
               ...process.env,
+              DATABASE_URL:
+                'postgres://podgauge_worker:podgauge_worker_dev_only@127.0.0.1:54329/podgauge',
               PODGAUGE_WORKER_CONCURRENCY: '1',
               PODGAUGE_LOG_LEVEL: 'info',
             },

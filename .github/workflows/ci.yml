@@ -36,7 +36,9 @@ jobs:
 
       - name: Migrate and seed development PostgreSQL
         run: |
+          corepack pnpm db:roles
           corepack pnpm db:migrate
+          corepack pnpm queue:migrate
           corepack pnpm db:seed
 
       - name: Verify repository

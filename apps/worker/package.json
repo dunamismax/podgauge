@@ -10,18 +10,24 @@
     }
   },
   "scripts": {
-    "build": "pnpm --filter @podgauge/config build && tsc -p tsconfig.json",
+    "build": "pnpm --filter @podgauge/config build && pnpm --filter @podgauge/db build && tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
     "dev": "pnpm --filter @podgauge/config build && tsx watch --clear-screen=false src/index.ts",
+    "queue:migrate": "pnpm --filter @podgauge/config build && pnpm --filter @podgauge/db build && tsx src/migrate-queue.ts",
     "smoke": "pnpm --filter @podgauge/config build && pnpm --filter @podgauge/observability build && tsx src/index.ts --smoke",
     "start": "node dist/index.js"
   },
   "dependencies": {
     "@podgauge/config": "workspace:*",
     "@podgauge/contracts": "workspace:*",
-    "@podgauge/observability": "workspace:*"
+    "@podgauge/db": "workspace:*",
+    "@podgauge/observability": "workspace:*",
+    "graphile-worker": "0.17.3",
+    "pg": "8.23.0"
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "12.1.0",
+    "@types/pg": "8.21.0",
     "tsx": "4.23.12"
   }
 }

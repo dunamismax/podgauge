@@ -1,6 +1,31 @@
 import { z } from 'zod';
 
-export const localDevelopmentDatabaseUrl =
+export const databaseRoleNames = Object.freeze({
+  backup: 'podgauge_backup',
+  migration: 'podgauge_migration',
+  web: 'podgauge_web',
+  worker: 'podgauge_worker',
+} as const);
+
+export type DatabaseRole = keyof typeof databaseRoleNames;
+
+const localDevelopmentPasswords = Object.freeze({
+  backup: 'podgauge_backup_dev_only',
+  migration: 'podgauge_migration_dev_only',
+  web: 'podgauge_web_dev_only',
+  worker: 'podgauge_worker_dev_only',
+} as const satisfies Record<DatabaseRole, string>);
+
+export const localDevelopmentDatabaseUrls = Object.freeze(
+  Object.fromEntries(
+    (Object.keys(databaseRoleNames) as DatabaseRole[]).map((role) => [
+      role,
+      `postgres://${databaseRoleNames[role]}:${localDevelopmentPasswords[role]}@127.0.0.1:54329/podgauge`,
+    ]),
+  ) as Readonly<Record<DatabaseRole, string>>,
+);
+
+export const localDevelopmentRoleBootstrapDatabaseUrl =
   'postgres://podgauge:podgauge_dev_only@127.0.0.1:54329/podgauge';
 
 const REDACTED = '[REDACTED]';
@@ -47,13 +72,15 @@ export class SecretValue {
   }
 }
 
-export type ConfigurationTarget = 'migration' | 'test' | 'web' | 'worker';
+export type ConfigurationTarget =
+  'backup' | 'migration' | 'role-bootstrap' | 'test' | 'web' | 'worker';
 export type DeploymentEnvironment = 'development' | 'production' | 'test';
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export type EnvironmentSource = Readonly<Record<string, string | undefined>>;
 
 type DatabaseConfiguration = Readonly<{
   databaseUrl: SecretValue;
+  databaseRole: DatabaseRole;
   environment: DeploymentEnvironment;
 }>;
 
@@ -71,6 +98,7 @@ export type WebConfiguration = DatabaseConfiguration &
 export type WorkerConfiguration = DatabaseConfiguration &
   Readonly<{
     concurrency: 1;
+    jobTimeoutSeconds: number;
     logLevel: LogLevel;
     runtime: 'worker';
     shutdownTimeoutSeconds: number;
@@ -81,6 +109,18 @@ export type MigrationConfiguration = DatabaseConfiguration &
     maxConnections: 1;
     runtime: 'migration';
   }>;
+
+export type BackupConfiguration = DatabaseConfiguration &
+  Readonly<{
+    runtime: 'backup';
+  }>;
+
+export type RoleBootstrapConfiguration = Readonly<{
+  adminDatabaseUrl: SecretValue;
+  environment: DeploymentEnvironment;
+  passwords: Readonly<Record<DatabaseRole, SecretValue>>;
+  runtime: 'role-bootstrap';
+}>;
 
 export type TestConfiguration = Readonly<{
   databaseUrl: SecretValue;
@@ -102,7 +142,15 @@ const TestSeedSchema = z
   .regex(/^[A-Za-z0-9][A-Za-z0-9._:-]*$/u, 'must be a stable token');
 
 const knownModeKeys = {
+  backup: [],
   migration: ['PODGAUGE_MIGRATION_MAX_CONNECTIONS'],
+  'role-bootstrap': [
+    'PODGAUGE_ROLE_BOOTSTRAP_DATABASE_URL',
+    'PODGAUGE_BACKUP_DATABASE_PASSWORD',
+    'PODGAUGE_MIGRATION_DATABASE_PASSWORD',
+    'PODGAUGE_WEB_DATABASE_PASSWORD',
+    'PODGAUGE_WORKER_DATABASE_PASSWORD',
+  ],
   test: [
     'PODGAUGE_RUN_DB_INTEGRATION',
     'PODGAUGE_TEST_DATABASE_URL',
@@ -119,6 +167,7 @@ const knownModeKeys = {
   ],
   worker: [
     'PODGAUGE_WORKER_CONCURRENCY',
+    'PODGAUGE_WORKER_JOB_TIMEOUT_SECONDS',
     'PODGAUGE_WORKER_SHUTDOWN_TIMEOUT_SECONDS',
   ],
 } as const satisfies Record<ConfigurationTarget, readonly string[]>;
@@ -177,14 +226,17 @@ function parseDatabaseUrl(
   target: ConfigurationTarget,
   environment: DeploymentEnvironment,
   rawValue: string | undefined,
+  expectedRole?: DatabaseRole,
 ): SecretValue {
   const value =
     rawValue ??
-    (environment === 'development' ? localDevelopmentDatabaseUrl : undefined);
+    (environment === 'development' && expectedRole !== undefined
+      ? localDevelopmentDatabaseUrls[expectedRole]
+      : undefined);
 
   if (value === undefined) {
     throw new ConfigurationError(target, [
-      `${environment === 'test' ? 'PODGAUGE_TEST_DATABASE_URL' : 'DATABASE_URL'} is required`,
+      `${target === 'test' ? 'PODGAUGE_TEST_DATABASE_URL' : 'DATABASE_URL'} is required`,
     ]);
   }
 
@@ -200,22 +252,62 @@ function parseDatabaseUrl(
     issues.push('database URL must use postgres:// or postgresql://');
   }
   if (parsed.hostname.length === 0) issues.push('database URL requires a host');
+  if (parsed.username.length === 0 || parsed.password.length === 0) {
+    issues.push('database URL requires explicit credentials');
+  }
   if (parsed.pathname.length <= 1) {
     issues.push('database URL requires a database name');
   }
   if (parsed.hash.length > 0)
     issues.push('database URL cannot include a fragment');
   if (
+    expectedRole !== undefined &&
+    parsed.username !== databaseRoleNames[expectedRole]
+  ) {
+    issues.push(
+      `database URL must use the ${databaseRoleNames[expectedRole]} role`,
+    );
+  }
+  if (
     environment === 'production' &&
-    (value === localDevelopmentDatabaseUrl ||
+    (Object.values(localDevelopmentDatabaseUrls).includes(value) ||
       parsed.username === 'podgauge' ||
-      parsed.password === 'podgauge_dev_only')
+      parsed.password.endsWith('_dev_only'))
   ) {
     issues.push('production cannot use documented local credentials');
   }
 
   if (issues.length > 0) throw new ConfigurationError(target, issues);
   return SecretValue.from(value);
+}
+
+function parseRolePassword(
+  target: ConfigurationTarget,
+  name: string,
+  environment: DeploymentEnvironment,
+  value: string | undefined,
+  developmentDefault: string,
+): SecretValue {
+  const candidate =
+    value ?? (environment === 'development' ? developmentDefault : undefined);
+  if (candidate === undefined) {
+    throw new ConfigurationError(target, [`${name} is required`]);
+  }
+  if (
+    candidate.length < 16 ||
+    candidate.length > 256 ||
+    /[\r\n\0]/u.test(candidate)
+  ) {
+    throw new ConfigurationError(target, [
+      `${name} must contain 16 to 256 non-control characters`,
+    ]);
+  }
+  if (environment === 'production' && candidate.endsWith('_dev_only')) {
+    throw new ConfigurationError(target, [
+      `${name} cannot use a documented local credential in production`,
+    ]);
+  }
+  return SecretValue.from(candidate);
 }
 
 function parseLogLevel(
@@ -350,15 +442,15 @@ export function readWebConfiguration(
     }
   }
 
-  const testDatabaseUrl =
-    deployment === 'test' ? environment.PODGAUGE_TEST_DATABASE_URL : undefined;
   return Object.freeze({
     bodySizeLimitBytes: parseBodySizeLimit('web', environment.BODY_SIZE_LIMIT),
     databaseUrl: parseDatabaseUrl(
       'web',
       deployment,
-      testDatabaseUrl ?? environment.DATABASE_URL,
+      environment.DATABASE_URL,
+      'web',
     ),
+    databaseRole: 'web',
     environment: deployment,
     host: parseHost('web', environment.HOST),
     logLevel: parseLogLevel('web', deployment, environment.PODGAUGE_LOG_LEVEL),
@@ -383,8 +475,6 @@ export function readWorkerConfiguration(
     environment,
     deployment === 'test' ? ['test'] : [],
   );
-  const testDatabaseUrl =
-    deployment === 'test' ? environment.PODGAUGE_TEST_DATABASE_URL : undefined;
 
   return Object.freeze({
     concurrency: parseField(
@@ -396,9 +486,17 @@ export function readWorkerConfiguration(
     databaseUrl: parseDatabaseUrl(
       'worker',
       deployment,
-      testDatabaseUrl ?? environment.DATABASE_URL,
+      environment.DATABASE_URL,
+      'worker',
     ),
+    databaseRole: 'worker',
     environment: deployment,
+    jobTimeoutSeconds: parseField(
+      'worker',
+      'PODGAUGE_WORKER_JOB_TIMEOUT_SECONDS',
+      z.coerce.number().int().min(1).max(3_600),
+      environment.PODGAUGE_WORKER_JOB_TIMEOUT_SECONDS ?? '300',
+    ),
     logLevel: parseLogLevel(
       'worker',
       deployment,
@@ -423,15 +521,15 @@ export function readMigrationConfiguration(
     environment,
     deployment === 'test' ? ['test'] : [],
   );
-  const testDatabaseUrl =
-    deployment === 'test' ? environment.PODGAUGE_TEST_DATABASE_URL : undefined;
 
   return Object.freeze({
     databaseUrl: parseDatabaseUrl(
       'migration',
       deployment,
-      testDatabaseUrl ?? environment.DATABASE_URL,
+      environment.DATABASE_URL,
+      'migration',
     ),
+    databaseRole: 'migration',
     environment: deployment,
     maxConnections: parseField(
       'migration',
@@ -440,6 +538,86 @@ export function readMigrationConfiguration(
       environment.PODGAUGE_MIGRATION_MAX_CONNECTIONS ?? '1',
     ),
     runtime: 'migration',
+  });
+}
+
+export function readBackupConfiguration(
+  environment: EnvironmentSource,
+): BackupConfiguration {
+  const deployment = parseEnvironment('backup', environment);
+  assertNoCrossModeKeys('backup', environment);
+
+  return Object.freeze({
+    databaseRole: 'backup',
+    databaseUrl: parseDatabaseUrl(
+      'backup',
+      deployment,
+      environment.DATABASE_URL,
+      'backup',
+    ),
+    environment: deployment,
+    runtime: 'backup',
+  });
+}
+
+export function readRoleBootstrapConfiguration(
+  environment: EnvironmentSource,
+): RoleBootstrapConfiguration {
+  const deployment = parseEnvironment('role-bootstrap', environment);
+  assertNoCrossModeKeys('role-bootstrap', environment);
+  const adminDatabaseUrl = parseDatabaseUrl(
+    'role-bootstrap',
+    deployment,
+    environment.PODGAUGE_ROLE_BOOTSTRAP_DATABASE_URL ??
+      (deployment === 'development'
+        ? localDevelopmentRoleBootstrapDatabaseUrl
+        : undefined),
+  );
+  const adminUsername = new URL(adminDatabaseUrl.reveal()).username;
+  if (
+    Object.values(databaseRoleNames).some(
+      (roleName) => roleName === adminUsername,
+    )
+  ) {
+    throw new ConfigurationError('role-bootstrap', [
+      'bootstrap database URL cannot use an application role',
+    ]);
+  }
+
+  return Object.freeze({
+    adminDatabaseUrl,
+    environment: deployment,
+    passwords: Object.freeze({
+      backup: parseRolePassword(
+        'role-bootstrap',
+        'PODGAUGE_BACKUP_DATABASE_PASSWORD',
+        deployment,
+        environment.PODGAUGE_BACKUP_DATABASE_PASSWORD,
+        localDevelopmentPasswords.backup,
+      ),
+      migration: parseRolePassword(
+        'role-bootstrap',
+        'PODGAUGE_MIGRATION_DATABASE_PASSWORD',
+        deployment,
+        environment.PODGAUGE_MIGRATION_DATABASE_PASSWORD,
+        localDevelopmentPasswords.migration,
+      ),
+      web: parseRolePassword(
+        'role-bootstrap',
+        'PODGAUGE_WEB_DATABASE_PASSWORD',
+        deployment,
+        environment.PODGAUGE_WEB_DATABASE_PASSWORD,
+        localDevelopmentPasswords.web,
+      ),
+      worker: parseRolePassword(
+        'role-bootstrap',
+        'PODGAUGE_WORKER_DATABASE_PASSWORD',
+        deployment,
+        environment.PODGAUGE_WORKER_DATABASE_PASSWORD,
+        localDevelopmentPasswords.worker,
+      ),
+    }),
+    runtime: 'role-bootstrap',
   });
 }
 

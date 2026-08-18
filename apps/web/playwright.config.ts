@@ -13,12 +13,11 @@ export default defineConfig({
   webServer: {
     command: 'pnpm preview',
     env: {
+      DATABASE_URL:
+        'postgres://podgauge_web:podgauge_web_dev_only@127.0.0.1:54329/podgauge',
       HOST: '127.0.0.1',
       NODE_ENV: 'test',
       ORIGIN: 'http://127.0.0.1:4173',
-      PODGAUGE_TEST_DATABASE_URL:
-        'postgres://podgauge:podgauge_dev_only@127.0.0.1:54329/podgauge',
-      PODGAUGE_TEST_SEED: 'podgauge-playwright-seed-v1',
       PORT: '4173',
     },
     reuseExistingServer: !process.env.CI,

@@ -2,6 +2,7 @@ import { readWorkerConfiguration } from '@podgauge/config';
 import { redactRecord } from '@podgauge/observability';
 
 import { runWorker } from './worker.js';
+import { startSmokeQueue } from './queue.js';
 
 const abortController = new AbortController();
 const configuration = readWorkerConfiguration(process.env);
@@ -14,6 +15,11 @@ if (process.argv.includes('--smoke')) {
   setImmediate(() => abortController.abort('smoke-complete'));
 }
 
-await runWorker(configuration, abortController.signal, (event) => {
-  process.stdout.write(`${JSON.stringify(redactRecord(event))}\n`);
-});
+await runWorker(
+  configuration,
+  abortController.signal,
+  (event) => {
+    process.stdout.write(`${JSON.stringify(redactRecord(event))}\n`);
+  },
+  process.argv.includes('--smoke') ? startSmokeQueue : undefined,
+);

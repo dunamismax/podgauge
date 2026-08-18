@@ -7,8 +7,9 @@ architecture and security blueprint. This file converts those documents into
 ordered, testable work. If they disagree, stop and reconcile the documents in
 the same change before implementing the disputed behavior.
 
-Last reconciled: 2026-08-17 after the validated configuration boundary and
-durable Phase 3 PostgreSQL schema and constraints landed.
+Last reconciled: 2026-08-18 after least-privilege PostgreSQL roles, genuine
+Testcontainers-managed database coverage, and Graphile Worker orchestration
+landed.
 
 ---
 
@@ -79,17 +80,20 @@ a control, or make a public claim on the owner's behalf.
 
 - **Active phase:** Phase 3 — PostgreSQL, jobs, configuration, and
   observability. All owner-independent Phase 0 through Phase 2 work is complete.
-- **Next recommended slice:** define separate migration, web, worker, and backup
-  PostgreSQL roles and prove runtime roles lack DDL privileges. Then add the
-  still-unimplemented Testcontainers repository coverage in checklist order.
+- **Next recommended slice:** create analysis records and enqueue jobs atomically
+  in one transaction, then prove retries do not duplicate completed work or
+  progress events.
 - **Current blockers:** the production proxy mode, transactional email delivery
   provider, OCI registry, and off-site backup target require owner choices
   before their dependent release tasks can close.
-- **Last verified:** Node 24.19.0 frozen install; the full repository verify with
-  live PostgreSQL integration; isolated clean migration and Phase 3 constraint
-  tests; migration and seeding with contract build artifacts absent; generated
-  migration drift; cross-browser Playwright/axe smoke; worker, source-sync, and
-  benchmark smokes; and Compose validation on 2026-08-17.
+- **Last verified:** Node 24.19.0 frozen install; role bootstrap against an
+  existing Compose volume; migration and seeding as the migration owner; full
+  repository verify with the Compose smoke and Testcontainers-owned PostgreSQL;
+  clean and forward migrations, role denials, repository rollback,
+  constraints, concurrent idempotency, and index plans; Graphile migration and
+  grants, named-task deduplication, retries, timeouts, and cancellation;
+  cross-browser Playwright/axe smoke; worker, source-sync, and benchmark smokes;
+  and Compose validation on 2026-08-18.
 - **Production state:** no application is deployed; `podgauge.com` is a target,
   not a currently verified service.
 
@@ -133,6 +137,14 @@ Verified in the repository at the current reconciliation:
       repositories, exact version references, and PostgreSQL constraints for
       privacy, ownership, idempotency, immutability, transitions, provenance,
       and reconnectable bounded event order.
+- [x] PostgreSQL uses separate migration-owner, web, worker, and read-only
+      backup logins. Runtime DML is explicit, DDL and elevated attributes are
+      denied, existing volumes have a rerunnable ownership-repair path, and
+      Testcontainers owns clean/forward migration and repository evidence.
+- [x] The separate worker runs Graphile Worker under its runtime role with a
+      named contract-validated analysis task, stable pending-job keys, bounded
+      retries and timeouts, serial CPU execution, private structural logs, and
+      retry-safe bounded shutdown.
 
 Do not describe examples in the README as live results until the end-to-end
 scanner and production service are actually verified.
@@ -339,12 +351,12 @@ into the pure engine.
 - [x] Add database constraints for immutable revisions and completed reports,
       valid state transitions, visibility, ownership, idempotency, version-tuple
       references, and bounded event ordering.
-- [ ] Define separate migration, web, worker, and backup PostgreSQL roles; prove
+- [x] Define separate migration, web, worker, and backup PostgreSQL roles; prove
       runtime roles lack DDL privileges in integration tests.
-- [ ] Add Testcontainers-backed migration and repository tests for a clean
+- [x] Add Testcontainers-backed migration and repository tests for a clean
       database, forward migrations, transaction rollback, constraints,
       concurrent idempotency, and representative indexed queries.
-- [ ] Integrate Graphile Worker with named, runtime-validated, idempotent tasks,
+- [x] Integrate Graphile Worker with named, runtime-validated, idempotent tasks,
       bounded retry policies, cancellation/timeout behavior, and one CPU-heavy
       job per worker process by default.
 - [ ] Create analysis records and enqueue jobs atomically in one transaction;
@@ -770,10 +782,12 @@ only after its prerequisite and acceptance criteria are documented.
 
 - PodGauge now has a runnable SSR shell, graceful worker, pure foundation
   packages, validated server configuration, a durable PostgreSQL user/data
-  schema, and executable portable contracts with synthetic fixtures. It still
-  has no separated runtime database roles, Testcontainers suite, Graphile
-  Worker queue, deck parser, scanner/report engine, implemented public analysis
-  API, PWA, calibration corpus, release image, or production deployment.
+  schema, least-privilege runtime database roles, Testcontainers-backed database
+  coverage, a Graphile Worker queue boundary, and executable portable contracts
+  with synthetic fixtures. The queue has no public producer or scanner executor
+  yet; the application still has no deck parser, scanner/report engine,
+  implemented public analysis API, PWA, calibration corpus, release image, or
+  production deployment.
 - The sample report in `README.md` illustrates the intended format and is not a
   result from a live scoring service.
 - No Capability thresholds, Deckprint weights, closing-window model, accuracy
@@ -881,6 +895,62 @@ mise exec node@24.19.0 -- corepack pnpm install --frozen-lockfile
 docker compose up -d --wait postgres
 mise exec node@24.19.0 -- corepack pnpm db:generate
 mise exec node@24.19.0 -- corepack pnpm db:migrate
+mise exec node@24.19.0 -- corepack pnpm db:seed
+PODGAUGE_RUN_DB_INTEGRATION=1 mise exec node@24.19.0 -- corepack pnpm verify
+mise exec node@24.19.0 -- corepack pnpm test:e2e
+mise exec node@24.19.0 -- corepack pnpm --filter @podgauge/worker smoke
+mise exec node@24.19.0 -- corepack pnpm data:sync
+mise exec node@24.19.0 -- corepack pnpm benchmark
+docker compose config
+docker compose config --quiet
+git diff --check
+```
+
+### Verified Phase 3 roles, Testcontainers, and queue
+
+The following passed on 2026-08-18 under Node 24.19.0 and pnpm 11.22.0. Role
+bootstrap was exercised against both a clean Testcontainers database and the
+existing data-preserving Compose volume. The initial existing-volume run found
+an owned-sequence transfer edge case and PostgreSQL's rejection of a password
+bind placeholder in `ALTER ROLE`; both paths were corrected before rerunning
+bootstrap, migration, and seed successfully.
+
+The database suite owns digest-pinned PostgreSQL 18.4 containers rather than
+mutating the Compose database. It proves clean and forward migrations,
+transaction rollback, ownership and visibility, state transitions,
+immutability, complete version references, actual concurrent idempotency, and
+the intended index plans. It also connects as migration, web, worker, and
+backup to prove allowed operations, forbidden DDL and writes, role attributes,
+and rerunnable ownership repair.
+
+Graphile Worker 0.17.3 migrations run only as `podgauge_migration`; reviewed
+grants and explicit RLS policies let the worker operate the queue without DDL
+and let backup read without writing. A separate owned container proves
+migration reruns, stable-key deduplication, one-at-a-time execution, retry
+bounds, execution-boundary payload validation, hard timeout, and retry-safe
+shutdown cancellation. Its allowlisted logger omits free-form messages and
+metadata. The first queue test exposed Graphile's RLS requirement and the need
+to explicitly unlock an aborted pool's job; the reviewed grants and shutdown
+path were corrected before the full rerun passed.
+
+The clean-artifact drill also caught the queue migrator loading the database
+package's aggregate repository entrypoint and therefore requiring prebuilt
+contract JavaScript. A dedicated role-management export now keeps queue
+migration on the schema-only path; role bootstrap, both migration commands, and
+seed were rerun with `packages/contracts/dist` absent.
+
+The first cross-browser rerun then found Playwright's server still supplied the
+old shared test database credential. Its test web process now receives the web
+role URL, and the configuration error label correctly distinguishes web from
+the deterministic test reader; the rebuilt cross-browser rerun passed.
+
+```sh
+mise exec node@24.19.0 -- corepack pnpm install --frozen-lockfile
+docker compose up -d --wait postgres
+mise exec node@24.19.0 -- corepack pnpm db:roles
+mise exec node@24.19.0 -- corepack pnpm db:generate
+mise exec node@24.19.0 -- corepack pnpm db:migrate
+mise exec node@24.19.0 -- corepack pnpm queue:migrate
 mise exec node@24.19.0 -- corepack pnpm db:seed
 PODGAUGE_RUN_DB_INTEGRATION=1 mise exec node@24.19.0 -- corepack pnpm verify
 mise exec node@24.19.0 -- corepack pnpm test:e2e

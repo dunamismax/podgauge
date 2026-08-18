@@ -7,8 +7,17 @@ const clientDirectory = join(root, 'apps/web/build/client');
 const forbiddenMarkers = [
   'DATABASE_URL',
   'PODGAUGE_TEST_DATABASE_URL',
+  'PODGAUGE_ROLE_BOOTSTRAP_DATABASE_URL',
+  'PODGAUGE_WEB_DATABASE_PASSWORD',
+  'PODGAUGE_WORKER_DATABASE_PASSWORD',
+  'PODGAUGE_MIGRATION_DATABASE_PASSWORD',
+  'PODGAUGE_BACKUP_DATABASE_PASSWORD',
   'POSTGRES_PASSWORD',
   'podgauge_dev_only',
+  'podgauge_web_dev_only',
+  'podgauge_worker_dev_only',
+  'podgauge_migration_dev_only',
+  'podgauge_backup_dev_only',
   'production-secret',
 ];
 const violations = [];

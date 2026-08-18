@@ -203,11 +203,13 @@ infra/                   Compose, Caddy, backup, and deployment assets
 ```
 
 The runnable foundation, portable contract layer, validated server-only
-configuration, and durable PostgreSQL core schema have landed. The repository
-serves a minimal SSR application, runs a separate graceful worker, enforces
-package and client/server boundaries, validates versioned analysis documents,
-and provides a loopback-only PostgreSQL 18 development service. It does **not**
-parse or analyze decks or run queued jobs yet.
+configuration, durable PostgreSQL core schema, least-privilege database roles,
+Testcontainers integration suite, and Graphile Worker queue boundary have
+landed. The repository serves a minimal SSR application, runs a separate
+graceful worker, enforces package and client/server boundaries, validates
+versioned analysis documents, and provides a loopback-only PostgreSQL 18
+development service. It does **not** parse or analyze decks, expose analysis
+submission, or execute the future deterministic scanner yet.
 
 With Node 24.19.0, Corepack, and Docker installed:
 
@@ -215,7 +217,9 @@ With Node 24.19.0, Corepack, and Docker installed:
 corepack enable
 corepack pnpm install --frozen-lockfile
 docker compose up -d --wait postgres
+corepack pnpm db:roles
 corepack pnpm db:migrate
+corepack pnpm queue:migrate
 corepack pnpm db:seed
 corepack pnpm dev
 ```

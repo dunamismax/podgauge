@@ -2,8 +2,10 @@
 
 PodGauge currently provides a minimal SSR web application, a separate graceful
 worker, pure package boundaries, a portable generated contract layer, validated
-server-only runtime configuration, and a durable PostgreSQL core schema. It
-does not parse, analyze, or enqueue decks yet.
+server-only runtime configuration, a durable PostgreSQL core schema,
+least-privilege database roles, and Testcontainers-backed database evidence. It
+also has a PostgreSQL-backed Graphile Worker queue boundary, but does not parse,
+analyze, or accept deck-analysis submissions yet.
 
 ## Prerequisites
 
@@ -26,7 +28,9 @@ cd podgauge
 corepack enable
 corepack pnpm install --frozen-lockfile
 docker compose up -d --wait postgres
+corepack pnpm db:roles
 corepack pnpm db:migrate
+corepack pnpm queue:migrate
 corepack pnpm db:seed
 corepack pnpm dev
 ```
@@ -36,7 +40,8 @@ process and reports JSON `ready` and `stopped` lifecycle events. PostgreSQL is
 published only on loopback at port `54329`; the official image is fixed to the
 PostgreSQL 18.4 multi-architecture digest recorded in `compose.yaml`.
 Credentials in `.env.example` are deliberately local-only and must never be
-reused in a shared environment.
+reused in a shared environment. The Compose `podgauge` login is an
+administrator used only by `db:roles`; it is not an application credential.
 
 Copy `.env.example` to `.env` only when overriding web or Compose development
 defaults. `.env` files are ignored. Keep commented worker, migration, and test
@@ -44,13 +49,20 @@ variables out of the web environment unless that process owns them; recognized
 cross-mode settings fail closed. The application foundation currently needs no
 third-party credentials.
 
-`@podgauge/config` validates four distinct targets: web, worker, migration, and
-test. Only the documented loopback development profile has safe defaults.
-Production web startup requires `DATABASE_URL`, `PODGAUGE_LOG_LEVEL`, an HTTPS
-`ORIGIN`, `HOST`, `PORT`, `BODY_SIZE_LIMIT`, and `SHUTDOWN_TIMEOUT`; database
-URLs and credential-bearing origins are never safe client data. Forwarded
-address variables remain rejected until the production network owner decision
-is implemented. The worker remains fixed at one CPU-heavy job per process.
+`@podgauge/config` validates distinct web, worker, migration, backup,
+administrator-only role-bootstrap, and test targets. A target's `DATABASE_URL`
+must use its exact `podgauge_web`, `podgauge_worker`, `podgauge_migration`, or
+`podgauge_backup` login; cross-role credentials fail closed. Only the documented
+loopback development profile has safe defaults. Production role bootstrap
+requires `PODGAUGE_ROLE_BOOTSTRAP_DATABASE_URL` plus four explicit role password
+values, and production processes require explicit role-scoped URLs. Production
+web startup also requires `PODGAUGE_LOG_LEVEL`, an HTTPS `ORIGIN`, `HOST`,
+`PORT`, `BODY_SIZE_LIMIT`, and `SHUTDOWN_TIMEOUT`; database URLs and
+credential-bearing origins are never safe client data. Forwarded-address
+variables remain rejected until the production network owner decision is
+implemented. The worker remains fixed at one CPU-heavy job per process.
+`PODGAUGE_WORKER_JOB_TIMEOUT_SECONDS` bounds each task independently of the
+bounded graceful-shutdown timeout.
 
 ## Commands
 
@@ -64,12 +76,14 @@ is implemented. The worker remains fixed at one CPU-heavy job per process.
 | `corepack pnpm contracts:generate`              | Regenerate JSON Schema and OpenAPI from authoritative Zod schemas                          |
 | `corepack pnpm contracts:check`                 | Fail when checked-in contract artifacts drift from their Zod sources                       |
 | `corepack pnpm test`                            | Run unit, component, and property tests                                                    |
-| `corepack pnpm test:integration`                | Exercise the worker as a real child process                                                |
+| `corepack pnpm test:integration`                | Exercise the worker and opt-in real PostgreSQL integration paths                           |
 | `corepack pnpm test:e2e`                        | Run the built app in Chromium, Firefox, and WebKit with axe checks                         |
 | `corepack pnpm build`                           | Produce package, worker, and adapter-node web builds                                       |
 | `corepack pnpm verify`                          | Run formatting, lint, diagnostics, tests, integration smoke, build, and client-secret scan |
 | `corepack pnpm db:generate`                     | Generate reviewed SQL when the Drizzle schema changes                                      |
+| `corepack pnpm db:roles`                        | Bootstrap or repair the four least-privilege PostgreSQL roles                              |
 | `corepack pnpm db:migrate`                      | Apply committed development migrations                                                     |
+| `corepack pnpm queue:migrate`                   | Apply Graphile Worker migrations as the migration owner, then runtime grants               |
 | `corepack pnpm db:seed`                         | Idempotently seed the tiny foundation metadata fixture                                     |
 | `corepack pnpm data:sync`                       | Report the fail-closed external-source state; it downloads nothing yet                     |
 | `corepack pnpm benchmark`                       | Run the deterministic foundation micro-smoke, not a scoring claim                          |
@@ -87,12 +101,70 @@ smoke and isolated Phase 3 database suite in the integration command:
 PODGAUGE_RUN_DB_INTEGRATION=1 corepack pnpm test:integration
 ```
 
-CI always runs this database path. The Phase 3 suite creates a randomly named
-database, applies every reviewed migration, exercises contracts and constraints,
-then drops that database; the local PostgreSQL role therefore needs development
-`CREATE DATABASE` permission. This is real PostgreSQL coverage, not
-Testcontainers coverage. Without the explicit flag, database tests are skipped
-so the fast gate remains usable on a machine without Docker.
+CI always runs this database path. The Compose smoke reads only the local
+development database. Separately, the Phase 3 suites use Testcontainers 12.1.0
+(MIT, Node `>=22.22`) to own a digest-pinned PostgreSQL 18.4 container; it does
+not create databases in or mutate the Compose service. The suite applies the
+foundation migration and then the remaining forward migration, reruns role
+bootstrap after objects exist, exercises allowed and denied operations for all
+four roles, repository rollback and constraints, genuinely concurrent
+idempotency, and representative index plans. A separate owned container applies
+and safely reruns Graphile migrations, then exercises queue-role denials,
+stable-key deduplication, serial execution, retry bounds, runtime payload
+validation, timeouts, and shutdown cancellation. Testcontainers stops every
+container on completion. Without the explicit flag, the database integration
+files are skipped so the fast gate remains usable on a machine without Docker.
+
+## Database roles and existing volumes
+
+Run `db:roles` before the first migration. It creates or repairs the fixed role
+names, makes `podgauge_migration` the sole application-object owner, revokes
+public schema creation, removes unexpected memberships, and rotates each role's
+password to the supplied value. `db:migrate` then reapplies the reviewed object
+grant manifest after every forward migration. Web and worker receive only their
+listed DML; backup receives `SELECT`; none receives DDL ownership or elevated
+role attributes.
+
+For a volume created before role separation, use the same data-preserving path:
+
+```sh
+docker compose up -d --wait postgres
+corepack pnpm db:roles
+corepack pnpm db:migrate
+corepack pnpm queue:migrate
+corepack pnpm db:seed
+```
+
+The bootstrap is idempotent and transfers existing `public`, Drizzle, and
+Graphile Worker objects to the migration owner. It does not drop a database,
+schema, table, or volume. `queue:migrate` is also rerunnable; it applies the
+exact dependency's forward migrations before reapplying the reviewed queue
+grants and RLS policies. Review `packages/db/roles/bootstrap.sql`, `grants.sql`,
+and `graphile-grants.sql` before production use.
+Load production URLs and passwords through the deployment's secret mechanism;
+never place them in shell history, command arguments, Git, images, or logs.
+
+## Queue boundary
+
+The worker uses the fixed `analyze_deck` task and `analysis_cpu` queue. Payloads
+are validated from shared contracts both before enqueue and immediately before
+execution. The analysis ID forms a stable pending-job key, retry counts come
+from the validated payload, process concurrency is fixed at one, and stuck work
+is aborted at the configured timeout. Shutdown first waits for cooperative work
+for its configured bound, then explicitly unlocks this worker pool's job so a
+later process can retry it.
+
+Graphile Worker runs with `podgauge_worker`, which has queue DML, routine, and
+explicit RLS-policy access but no schema ownership or DDL. Only
+`queue:migrate`, using `podgauge_migration`, may change the queue schema. Queue
+logs intentionally allowlist structural level and scope fields and discard
+free-form messages and metadata so job payloads, deck contents, and credential
+values cannot enter process output. Full Pino observability remains a later
+Phase 3 item.
+
+No public producer or scanner executor exists yet. Manually adding a valid job
+will reach a fail-closed placeholder and exhaust only its configured attempts;
+the next checklist item owns atomic analysis-record creation and enqueueing.
 
 ## Fixtures and external data
 
@@ -116,6 +188,11 @@ attribution, and provenance review is approved under
   all interfaces.
 - **Migration connection refused:** run `docker compose up -d --wait postgres`
   and inspect `docker compose ps` plus `docker compose logs postgres`.
+- **Migration role missing or denied:** run `corepack pnpm db:roles` once with
+  the administrator-only bootstrap environment, then rerun the migration. This
+  is the required upgrade step for pre-role-separation volumes.
+- **Queue schema missing or denied:** run `corepack pnpm queue:migrate` with the
+  migration-role URL after `db:migrate`; never grant DDL to the worker login.
 - **Missing Playwright executable:** run the browser installation command above.
 - **Stale build output:** remove ignored `dist`, `build`, and `.svelte-kit`
   directories, then rerun `corepack pnpm verify`. Do not delete source or the
@@ -126,10 +203,9 @@ attribution, and provenance review is approved under
 - **Configuration failure:** read the named target and field in the
   non-sensitive `ConfigurationError`. Do not print `process.env` or reveal a
   `SecretValue` to diagnose it.
-- **Database integration permission:** the isolated suite needs to create and
-  drop a temporary database. Use the documented development PostgreSQL role;
-  runtime roles will intentionally lack this permission once role separation
-  lands.
+- **Testcontainers unavailable:** verify Docker is running and that the current
+  Docker context is accessible. The Phase 3 suite owns an isolated container
+  and intentionally does not fall back to the Compose database.
 
 ## Teardown
 
