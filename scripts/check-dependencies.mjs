@@ -4,18 +4,23 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const allowedWorkspaceDependencies = new Map([
+  ['@podgauge/config', new Set()],
   ['@podgauge/contracts', new Set()],
   ['@podgauge/engine', new Set(['@podgauge/contracts'])],
   ['@podgauge/policy', new Set(['@podgauge/contracts'])],
   ['@podgauge/card-data', new Set(['@podgauge/contracts'])],
-  ['@podgauge/db', new Set(['@podgauge/contracts'])],
+  ['@podgauge/db', new Set(['@podgauge/config', '@podgauge/contracts'])],
   ['@podgauge/ui', new Set()],
   ['@podgauge/observability', new Set()],
-  ['@podgauge/web', new Set(['@podgauge/contracts', '@podgauge/ui'])],
+  [
+    '@podgauge/web',
+    new Set(['@podgauge/config', '@podgauge/contracts', '@podgauge/ui']),
+  ],
   [
     '@podgauge/worker',
     new Set([
       '@podgauge/card-data',
+      '@podgauge/config',
       '@podgauge/contracts',
       '@podgauge/db',
       '@podgauge/engine',
@@ -84,6 +89,31 @@ for (const entry of await readdir(engineDirectory, { withFileTypes: true })) {
         `${relative(root, path)} contains forbidden ${description}`,
       );
     }
+  }
+}
+
+async function* sourceFiles(directory) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) yield* sourceFiles(path);
+    else if (entry.isFile() && /\.(?:svelte|ts)$/u.test(entry.name)) yield path;
+  }
+}
+
+const webSourceDirectory = join(root, 'apps/web/src');
+for await (const path of sourceFiles(webSourceDirectory)) {
+  const source = await readFile(path, 'utf8');
+  if (!source.includes('@podgauge/config')) continue;
+
+  const normalizedPath = relative(root, path).replaceAll('\\', '/');
+  const isServerOnly =
+    normalizedPath.includes('/lib/server/') ||
+    /(?:^|\/)(?:hooks|[^/]+)\.server\.ts$/u.test(normalizedPath) ||
+    normalizedPath.endsWith('/+server.ts');
+  if (!isServerOnly) {
+    violations.push(
+      `${normalizedPath} imports server-only @podgauge/config outside a SvelteKit server boundary`,
+    );
   }
 }
 

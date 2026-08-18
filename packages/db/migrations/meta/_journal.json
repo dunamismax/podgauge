@@ -8,6 +8,13 @@
       "when": 1787005083227,
       "tag": "0000_romantic_photon",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1787022885770,
+      "tag": "0001_shallow_mojo",
+      "breakpoints": true
     }
   ]
 }

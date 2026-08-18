@@ -11,7 +11,16 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'HOST=127.0.0.1 PORT=4173 pnpm preview',
+    command: 'pnpm preview',
+    env: {
+      HOST: '127.0.0.1',
+      NODE_ENV: 'test',
+      ORIGIN: 'http://127.0.0.1:4173',
+      PODGAUGE_TEST_DATABASE_URL:
+        'postgres://podgauge:podgauge_dev_only@127.0.0.1:54329/podgauge',
+      PODGAUGE_TEST_SEED: 'podgauge-playwright-seed-v1',
+      PORT: '4173',
+    },
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
     url: 'http://127.0.0.1:4173/health/live',

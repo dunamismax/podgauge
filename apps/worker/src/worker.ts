@@ -1,4 +1,4 @@
-import type { WorkerConfiguration } from './config.js';
+import type { WorkerConfiguration } from '@podgauge/config';
 
 type WriteEvent = (event: Readonly<Record<string, unknown>>) => void;
 

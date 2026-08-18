@@ -19,6 +19,8 @@ accepted ADR supported by a measured need.
 
 - `apps/web` owns SvelteKit pages, endpoints, authorization, and HTTP concerns.
 - `apps/worker` owns slow, retryable, scheduled, and resource-bounded work.
+- `packages/config` owns validated server-only process configuration and secret
+  wrappers. Web imports are confined to SvelteKit server modules.
 - `packages/contracts` owns runtime schemas and portable serialized contracts.
 - `packages/engine` is pure and deterministic. It may depend only on contracts
   and explicit data interfaces. It must not read the network, database,

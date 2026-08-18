@@ -7,13 +7,14 @@
     ".": "./build/index.js"
   },
   "scripts": {
-    "build": "vite build",
+    "build": "pnpm --filter @podgauge/config build && vite build",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "dev": "vite dev --host 127.0.0.1",
+    "dev": "pnpm --filter @podgauge/config build && vite dev --host 127.0.0.1",
     "preview": "node build/index.js",
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@podgauge/config": "workspace:*",
     "@podgauge/ui": "workspace:*",
     "@sveltejs/kit": "2.70.2",
     "svelte": "5.56.9"

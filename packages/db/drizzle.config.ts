@@ -1,12 +1,11 @@
+import { readMigrationConfiguration } from '@podgauge/config';
 import { defineConfig } from 'drizzle-kit';
 
-const databaseUrl =
-  process.env.DATABASE_URL ??
-  'postgres://podgauge:podgauge_dev_only@127.0.0.1:54329/podgauge';
+const configuration = readMigrationConfiguration(process.env);
 
 export default defineConfig({
   dialect: 'postgresql',
-  dbCredentials: { url: databaseUrl },
+  dbCredentials: { url: configuration.databaseUrl.reveal() },
   out: './migrations',
   schema: './src/schema.ts',
   strict: true,

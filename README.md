@@ -190,6 +190,7 @@ apps/worker              Background scans, imports, and simulations
 packages/engine          Pure deterministic scoring functions
 packages/policy          Brackets, Game Changers, and banned-list fixtures
 packages/card-data       Card ingestion and versioned role overlays
+packages/config          Validated server-only process configuration
 packages/contracts       Shared schemas and report contracts
 packages/db              Database schema, repositories, and migrations
 packages/ui              PodGauge design system and components
@@ -201,11 +202,12 @@ docs/                    Product, method, architecture, and operations docs
 infra/                   Compose, Caddy, backup, and deployment assets
 ```
 
-The first runnable foundation and portable contract layer have landed. The
-repository serves a minimal SSR application, runs a separate graceful worker,
-enforces package boundaries, validates versioned analysis documents, and
-provides a loopback-only PostgreSQL 18 development service. It does **not**
-parse or analyze decks yet.
+The runnable foundation, portable contract layer, validated server-only
+configuration, and durable PostgreSQL core schema have landed. The repository
+serves a minimal SSR application, runs a separate graceful worker, enforces
+package and client/server boundaries, validates versioned analysis documents,
+and provides a loopback-only PostgreSQL 18 development service. It does **not**
+parse or analyze decks or run queued jobs yet.
 
 With Node 24.19.0, Corepack, and Docker installed:
 

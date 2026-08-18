@@ -1,6 +1,6 @@
+import { readWorkerConfiguration } from '@podgauge/config';
 import { redactRecord } from '@podgauge/observability';
 
-import { readWorkerConfiguration } from './config.js';
 import { runWorker } from './worker.js';
 
 const abortController = new AbortController();

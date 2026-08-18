@@ -113,6 +113,7 @@ apps/
   web/                 SvelteKit UI, server routes, REST API, and SSE
   worker/              Graphile Worker tasks and scheduled imports
 packages/
+  config/              Validated server-only runtime configuration
   engine/              Pure deterministic scoring and simulation
   policy/              Versioned Commander policy and bracket rules
   card-data/           Normalization, role overlays, and source adapters

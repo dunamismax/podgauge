@@ -1,9 +1,12 @@
+import { readTestConfiguration } from '@podgauge/config';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { createMigrationClient } from './client.js';
 
-const databaseDescribe =
-  process.env.PODGAUGE_RUN_DB_INTEGRATION === '1' ? describe : describe.skip;
+const testConfiguration = readTestConfiguration(process.env);
+const databaseDescribe = testConfiguration.runDatabaseIntegration
+  ? describe
+  : describe.skip;
 
 databaseDescribe('PostgreSQL foundation', () => {
   const { sql } = createMigrationClient(process.env);

@@ -12,11 +12,13 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
-    "db:generate": "drizzle-kit generate --config drizzle.config.ts",
-    "db:migrate": "tsx src/migrate.ts",
-    "db:seed": "tsx src/seed.ts"
+    "db:generate": "pnpm --filter @podgauge/config build && drizzle-kit generate --config drizzle.config.ts",
+    "db:migrate": "pnpm --filter @podgauge/config build && tsx src/migrate.ts",
+    "db:seed": "pnpm --filter @podgauge/config build && tsx src/seed.ts"
   },
   "dependencies": {
+    "@podgauge/config": "workspace:*",
+    "@podgauge/contracts": "workspace:*",
     "drizzle-orm": "0.45.2",
     "postgres": "3.4.9",
     "zod": "4.4.3"

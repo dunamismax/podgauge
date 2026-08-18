@@ -10,16 +10,16 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "pnpm --filter @podgauge/config build && tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
-    "dev": "tsx watch --clear-screen=false src/index.ts",
-    "smoke": "pnpm --filter @podgauge/observability build && tsx src/index.ts --smoke",
+    "dev": "pnpm --filter @podgauge/config build && tsx watch --clear-screen=false src/index.ts",
+    "smoke": "pnpm --filter @podgauge/config build && pnpm --filter @podgauge/observability build && tsx src/index.ts --smoke",
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@podgauge/config": "workspace:*",
     "@podgauge/contracts": "workspace:*",
-    "@podgauge/observability": "workspace:*",
-    "zod": "4.4.3"
+    "@podgauge/observability": "workspace:*"
   },
   "devDependencies": {
     "tsx": "4.23.12"

@@ -7,8 +7,8 @@ architecture and security blueprint. This file converts those documents into
 ordered, testable work. If they disagree, stop and reconcile the documents in
 the same change before implementing the disputed behavior.
 
-Last reconciled: 2026-08-17 after the MIT license, authorship, and
-private-reporting owner decisions.
+Last reconciled: 2026-08-17 after the validated configuration boundary and
+durable Phase 3 PostgreSQL schema and constraints landed.
 
 ---
 
@@ -79,16 +79,16 @@ a control, or make a public claim on the owner's behalf.
 
 - **Active phase:** Phase 3 — PostgreSQL, jobs, configuration, and
   observability. All owner-independent Phase 0 through Phase 2 work is complete.
-- **Next recommended slice:** implement the validated server-only configuration
-  boundary, then add the first reviewed Phase 3 Drizzle schemas and constraints
-  in checklist order without choosing an owner-blocked production service.
+- **Next recommended slice:** define separate migration, web, worker, and backup
+  PostgreSQL roles and prove runtime roles lack DDL privileges. Then add the
+  still-unimplemented Testcontainers repository coverage in checklist order.
 - **Current blockers:** the production proxy mode, transactional email delivery
   provider, OCI registry, and off-site backup target require owner choices
   before their dependent release tasks can close.
-- **Last verified:** Node 24.19.0 frozen install; Phase 2 contract, fixture,
-  compatibility, golden-hash, generated-artifact, and consumer tests; the full
-  repository verify with live PostgreSQL integration; cross-browser
-  Playwright/axe smoke; and `docker compose config` on 2026-08-17.
+- **Last verified:** Node 24.19.0 frozen install; the full repository verify with
+  live PostgreSQL integration; isolated clean migration and Phase 3 constraint
+  tests; generated migration drift; cross-browser Playwright/axe smoke; worker,
+  source-sync, and benchmark smokes; and Compose validation on 2026-08-17.
 - **Production state:** no application is deployed; `podgauge.com` is a target,
   not a currently verified service.
 
@@ -107,10 +107,11 @@ Verified in the repository at the current reconciliation:
       boundaries, security baseline, PWA behavior, deployment topology, tests,
       operations, and initial implementation sequence.
 - [x] The pinned Node 24.19.0/pnpm 11.22.0 workspace contains a SvelteKit SSR
-      shell, a separate graceful worker, seven bounded packages, a frozen
+      shell, a separate graceful worker, eight bounded packages, a frozen
       lockfile, unit/property/component/integration/browser tests, and CI.
 - [x] Development PostgreSQL 18.4 is digest-pinned, loopback-only, healthy under
-      Compose, and accepts the reviewed foundation migration and idempotent seed.
+      Compose, and accepts the reviewed durable core migrations and idempotent
+      foundation seed.
 - [x] PodGauge's original software and documentation are copyright Stephen
       Sawyer (`dunamismax`) and use the MIT License; third-party Magic material
       and fixtures remain outside that grant.
@@ -124,6 +125,13 @@ Verified in the repository at the current reconciliation:
       documents, the full version tuple and evidence graph, job/API envelopes,
       canonical serialization and hashing, generated JSON Schema/OpenAPI, and
       independently authored synthetic compatibility and edge-case fixtures.
+- [x] `packages/config` owns fail-fast web, worker, migration, and deterministic
+      test readers; secret values redact by default, SvelteKit confines web use
+      to server modules, and the built client is scanned for private markers.
+- [x] `packages/db` owns 22 reviewed durable tables, contract-validating write
+      repositories, exact version references, and PostgreSQL constraints for
+      privacy, ownership, idempotency, immutability, transitions, provenance,
+      and reconnectable bounded event order.
 
 Do not describe examples in the README as live results until the end-to-end
 scanner and production service are actually verified.
@@ -321,13 +329,13 @@ executable.
 Purpose: create durable orchestration without allowing infrastructure concerns
 into the pure engine.
 
-- [ ] Implement a validated server-only configuration module that fails fast,
+- [x] Implement a validated server-only configuration module that fails fast,
       distinguishes web, worker, migration, and test settings, and never exports
       secrets into the client bundle.
-- [ ] Add reviewed Drizzle schemas and SQL migrations for users/sessions,
+- [x] Add reviewed Drizzle schemas and SQL migrations for users/sessions,
       decks/revisions, version records, analyses/events/findings/artifacts,
       pods, source syncs/provenance, and audit events.
-- [ ] Add database constraints for immutable revisions and completed reports,
+- [x] Add database constraints for immutable revisions and completed reports,
       valid state transitions, visibility, ownership, idempotency, version-tuple
       references, and bounded event ordering.
 - [ ] Define separate migration, web, worker, and backup PostgreSQL roles; prove
@@ -760,10 +768,11 @@ only after its prerequisite and acceptance criteria are documented.
 ## Known limits not to overclaim
 
 - PodGauge now has a runnable SSR shell, graceful worker, pure foundation
-  packages, a development PostgreSQL schema, and executable portable contracts
-  with synthetic fixtures. It still has no deck parser, scanner/report engine,
-  implemented public analysis API, Graphile Worker queue, user-data schema,
-  PWA, calibration corpus, release image, or production deployment.
+  packages, validated server configuration, a durable PostgreSQL user/data
+  schema, and executable portable contracts with synthetic fixtures. It still
+  has no separated runtime database roles, Testcontainers suite, Graphile
+  Worker queue, deck parser, scanner/report engine, implemented public analysis
+  API, PWA, calibration corpus, release image, or production deployment.
 - The sample report in `README.md` illustrates the intended format and is not a
   result from a live scoring service.
 - No Capability thresholds, Deckprint weights, closing-window model, accuracy
@@ -841,6 +850,38 @@ docker compose up -d --wait postgres
 mise exec node@24.19.0 -- corepack pnpm db:migrate
 mise exec node@24.19.0 -- corepack pnpm db:seed
 docker compose config
+git diff --check
+```
+
+### Verified Phase 3 configuration, schema, and constraints
+
+The following passed on 2026-08-17 under Node 24.19.0 and pnpm 11.22.0. The
+aggregate verify used the live Compose PostgreSQL service. The Phase 3 suite
+created an isolated database, applied both reviewed migrations from empty,
+exercised contract-validating repository writes and constraints, then dropped
+the database. It covered concurrent idempotency and event writers, rollback
+after a deferred constraint failure, immutable revisions and completed reports,
+ownership/private defaults, complete version tuples and provenance, valid state
+transitions, and bounded monotonic events. This does not claim Testcontainers.
+
+The first generated schema review exposed parameter placeholders in CHECK
+expressions before publication; the schema source was corrected to emit literal
+static patterns, the migration was regenerated, and the migration-artifact test
+now rejects placeholders or missing handwritten constraint triggers.
+
+```sh
+mise exec node@24.19.0 -- corepack pnpm install --frozen-lockfile
+docker compose up -d --wait postgres
+mise exec node@24.19.0 -- corepack pnpm db:generate
+mise exec node@24.19.0 -- corepack pnpm db:migrate
+mise exec node@24.19.0 -- corepack pnpm db:seed
+PODGAUGE_RUN_DB_INTEGRATION=1 mise exec node@24.19.0 -- corepack pnpm verify
+mise exec node@24.19.0 -- corepack pnpm test:e2e
+mise exec node@24.19.0 -- corepack pnpm --filter @podgauge/worker smoke
+mise exec node@24.19.0 -- corepack pnpm data:sync
+mise exec node@24.19.0 -- corepack pnpm benchmark
+docker compose config
+docker compose config --quiet
 git diff --check
 ```
 
