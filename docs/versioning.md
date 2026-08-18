@@ -26,6 +26,13 @@ in the current path. A breaking API release receives a new path and a documented
 migration/support window. Report readers must ignore unknown optional fields;
 writers must never emit a newer required shape under an older version.
 
+The initial report-schema compatibility line is `0.1.x`. Additive experimental
+data is confined to the explicit `extensions` object under namespaced `x-*`
+keys, so an older strict reader can preserve or ignore it without accepting
+unknown top-level shape. The compatibility reader accepts the same documented
+line and rejects a different `0.y` line explicitly until a migration is
+registered. Missing versions and unversioned top-level additions are invalid.
+
 Any breaking change needs an ADR or migration note, compatibility tests, updated
 fixtures, and a version increment in the same change. Score- or timing-affecting
 changes also require benchmark before/after evidence once that harness exists.

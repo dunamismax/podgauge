@@ -1,0 +1,23 @@
+{
+  "reportVectors": [
+    {
+      "canonicalByteLength": 3676,
+      "expectedSha256": "982cb59863bc57cdde86f5ef627c1b2c0ada8bc22798bb837a3606e0781c593a",
+      "fixture": "report-v0.1.0.json"
+    }
+  ],
+  "utf8Vectors": [
+    {
+      "expectedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "value": ""
+    },
+    {
+      "expectedSha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+      "value": "abc"
+    },
+    {
+      "expectedSha256": "6995b833ab526ad6fe53589138a986e6240f4b4751de8914ed590fba6a9af800",
+      "value": "PodGauge \u2014 deterministic \ud83c\udccf"
+    }
+  ]
+}

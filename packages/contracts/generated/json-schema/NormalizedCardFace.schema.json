@@ -1,0 +1,85 @@
+{
+  "$defs": {
+    "__schema0": {
+      "enum": [
+        "W",
+        "U",
+        "B",
+        "R",
+        "G"
+      ],
+      "type": "string"
+    }
+  },
+  "$id": "https://podgauge.com/schemas/NormalizedCardFace.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "cardId": {
+      "pattern": "^card_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "colors": {
+      "items": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "maxItems": 5,
+      "readOnly": true,
+      "type": "array"
+    },
+    "faceId": {
+      "pattern": "^face_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "faceIndex": {
+      "maximum": 7,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "manaCost": {
+      "anyOf": [
+        {
+          "maxLength": 256,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+    },
+    "oracleText": {
+      "anyOf": [
+        {
+          "maxLength": 16384,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "typeLine": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "readOnly": true,
+  "required": [
+    "cardId",
+    "colors",
+    "faceId",
+    "faceIndex",
+    "manaCost",
+    "name",
+    "oracleText",
+    "typeLine"
+  ],
+  "title": "NormalizedCardFace",
+  "type": "object"
+}

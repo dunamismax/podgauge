@@ -1,0 +1,656 @@
+{
+  "cases": [
+    {
+      "caseId": "legal-synthetic",
+      "category": "legal",
+      "expected": {
+        "normalizedDeckValid": true,
+        "parsedEntriesValid": true,
+        "rawInputValid": true,
+        "reasonCodes": []
+      },
+      "normalizedDeck": {
+        "cards": [
+          {
+            "cardId": "card_10000000-0000-4000-8000-000000000001",
+            "colorIdentity": ["G"],
+            "commanderEligibility": "eligible",
+            "faces": [
+              {
+                "cardId": "card_10000000-0000-4000-8000-000000000001",
+                "colors": ["G"],
+                "faceId": "face_10000000-0000-4000-8000-000000000001",
+                "faceIndex": 0,
+                "manaCost": "{2}{G}",
+                "name": "Synthetic Grove Keeper",
+                "oracleText": null,
+                "typeLine": "Legendary Creature — Test Druid"
+              }
+            ],
+            "layout": "normal"
+          },
+          {
+            "cardId": "card_10000000-0000-4000-8000-000000000002",
+            "colorIdentity": [],
+            "commanderEligibility": "ineligible",
+            "faces": [
+              {
+                "cardId": "card_10000000-0000-4000-8000-000000000002",
+                "colors": [],
+                "faceId": "face_10000000-0000-4000-8000-000000000002",
+                "faceIndex": 0,
+                "manaCost": null,
+                "name": "Synthetic Basic Land",
+                "oracleText": null,
+                "typeLine": "Basic Land — Test"
+              }
+            ],
+            "layout": "normal"
+          }
+        ],
+        "commanders": [
+          {
+            "cardId": "card_10000000-0000-4000-8000-000000000001",
+            "designation": "commander",
+            "faceId": "face_10000000-0000-4000-8000-000000000001",
+            "parsedEntryId": "entry_10000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "entries": [
+          {
+            "cardId": "card_10000000-0000-4000-8000-000000000001",
+            "parsedEntryId": "entry_10000000-0000-4000-8000-000000000001",
+            "quantity": 1,
+            "section": "commander",
+            "status": "resolved"
+          },
+          {
+            "cardId": "card_10000000-0000-4000-8000-000000000002",
+            "parsedEntryId": "entry_10000000-0000-4000-8000-000000000002",
+            "quantity": 99,
+            "section": "mainboard",
+            "status": "resolved"
+          }
+        ],
+        "format": "commander"
+      },
+      "parsedEntries": [
+        {
+          "collectorNumber": null,
+          "entryId": "entry_10000000-0000-4000-8000-000000000001",
+          "line": 1,
+          "name": "Synthetic Grove Keeper",
+          "quantity": 1,
+          "section": "commander",
+          "setCode": null
+        },
+        {
+          "collectorNumber": null,
+          "entryId": "entry_10000000-0000-4000-8000-000000000002",
+          "line": 2,
+          "name": "Synthetic Basic Land",
+          "quantity": 99,
+          "section": "mainboard",
+          "setCode": null
+        }
+      ],
+      "rawInput": {
+        "format": "commander",
+        "inputId": "input_10000000-0000-4000-8000-000000000001",
+        "source": "paste",
+        "text": "COMMANDER\n1 Synthetic Grove Keeper\nDECK\n99 Synthetic Basic Land"
+      }
+    },
+    {
+      "caseId": "illegal-synthetic",
+      "category": "illegal",
+      "expected": {
+        "normalizedDeckValid": true,
+        "parsedEntriesValid": true,
+        "rawInputValid": true,
+        "reasonCodes": ["deck.illegal-card"]
+      },
+      "normalizedDeck": {
+        "cards": [
+          {
+            "cardId": "card_20000000-0000-4000-8000-000000000001",
+            "colorIdentity": ["B"],
+            "commanderEligibility": "eligible",
+            "faces": [
+              {
+                "cardId": "card_20000000-0000-4000-8000-000000000001",
+                "colors": ["B"],
+                "faceId": "face_20000000-0000-4000-8000-000000000001",
+                "faceIndex": 0,
+                "manaCost": "{B}",
+                "name": "Synthetic Prohibited Captain",
+                "oracleText": null,
+                "typeLine": "Legendary Creature — Test Pirate"
+              }
+            ],
+            "layout": "normal"
+          }
+        ],
+        "commanders": [
+          {
+            "cardId": "card_20000000-0000-4000-8000-000000000001",
+            "designation": "commander",
+            "faceId": null,
+            "parsedEntryId": "entry_20000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "entries": [
+          {
+            "cardId": "card_20000000-0000-4000-8000-000000000001",
+            "parsedEntryId": "entry_20000000-0000-4000-8000-000000000001",
+            "quantity": 1,
+            "section": "commander",
+            "status": "resolved"
+          }
+        ],
+        "format": "commander"
+      },
+      "parsedEntries": [
+        {
+          "collectorNumber": null,
+          "entryId": "entry_20000000-0000-4000-8000-000000000001",
+          "line": 1,
+          "name": "Synthetic Prohibited Captain",
+          "quantity": 1,
+          "section": "commander",
+          "setCode": null
+        }
+      ],
+      "rawInput": {
+        "format": "commander",
+        "inputId": "input_20000000-0000-4000-8000-000000000001",
+        "source": "paste",
+        "text": "1 Synthetic Prohibited Captain"
+      }
+    },
+    {
+      "caseId": "incomplete-synthetic",
+      "category": "incomplete",
+      "expected": {
+        "normalizedDeckValid": true,
+        "parsedEntriesValid": true,
+        "rawInputValid": true,
+        "reasonCodes": ["deck.incomplete", "card.unresolved"]
+      },
+      "normalizedDeck": {
+        "cards": [
+          {
+            "cardId": "card_30000000-0000-4000-8000-000000000001",
+            "colorIdentity": ["U"],
+            "commanderEligibility": "eligible",
+            "faces": [
+              {
+                "cardId": "card_30000000-0000-4000-8000-000000000001",
+                "colors": ["U"],
+                "faceId": "face_30000000-0000-4000-8000-000000000001",
+                "faceIndex": 0,
+                "manaCost": "{2}{U}",
+                "name": "Synthetic Tide Reader",
+                "oracleText": null,
+                "typeLine": "Legendary Creature — Test Wizard"
+              }
+            ],
+            "layout": "normal"
+          }
+        ],
+        "commanders": [
+          {
+            "cardId": "card_30000000-0000-4000-8000-000000000001",
+            "designation": "commander",
+            "faceId": null,
+            "parsedEntryId": "entry_30000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "entries": [
+          {
+            "cardId": "card_30000000-0000-4000-8000-000000000001",
+            "parsedEntryId": "entry_30000000-0000-4000-8000-000000000001",
+            "quantity": 1,
+            "section": "commander",
+            "status": "resolved"
+          },
+          {
+            "parsedEntryId": "entry_30000000-0000-4000-8000-000000000002",
+            "quantity": 1,
+            "reason": "no-match",
+            "section": "mainboard",
+            "status": "unresolved"
+          }
+        ],
+        "format": "commander"
+      },
+      "parsedEntries": [
+        {
+          "collectorNumber": null,
+          "entryId": "entry_30000000-0000-4000-8000-000000000001",
+          "line": 1,
+          "name": "Synthetic Tide Reader",
+          "quantity": 1,
+          "section": "commander",
+          "setCode": null
+        },
+        {
+          "collectorNumber": null,
+          "entryId": "entry_30000000-0000-4000-8000-000000000002",
+          "line": 2,
+          "name": "Unresolvable Synthetic Card",
+          "quantity": 1,
+          "section": "mainboard",
+          "setCode": null
+        }
+      ],
+      "rawInput": {
+        "format": "commander",
+        "inputId": "input_30000000-0000-4000-8000-000000000001",
+        "source": "paste",
+        "text": "1 Synthetic Tide Reader\n1 Unresolvable Synthetic Card"
+      }
+    },
+    {
+      "caseId": "duplicate-heavy-synthetic",
+      "category": "duplicate-heavy",
+      "expected": {
+        "normalizedDeckValid": true,
+        "parsedEntriesValid": true,
+        "rawInputValid": true,
+        "reasonCodes": ["deck.duplicate-card"]
+      },
+      "normalizedDeck": {
+        "cards": [
+          {
+            "cardId": "card_40000000-0000-4000-8000-000000000001",
+            "colorIdentity": ["R"],
+            "commanderEligibility": "eligible",
+            "faces": [
+              {
+                "cardId": "card_40000000-0000-4000-8000-000000000001",
+                "colors": ["R"],
+                "faceId": "face_40000000-0000-4000-8000-000000000001",
+                "faceIndex": 0,
+                "manaCost": "{3}{R}",
+                "name": "Synthetic Ember Chief",
+                "oracleText": null,
+                "typeLine": "Legendary Creature — Test Warrior"
+              }
+            ],
+            "layout": "normal"
+          },
+          {
+            "cardId": "card_40000000-0000-4000-8000-000000000002",
+            "colorIdentity": ["R"],
+            "commanderEligibility": "ineligible",
+            "faces": [
+              {
+                "cardId": "card_40000000-0000-4000-8000-000000000002",
+                "colors": ["R"],
+                "faceId": "face_40000000-0000-4000-8000-000000000002",
+                "faceIndex": 0,
+                "manaCost": "{R}",
+                "name": "Synthetic Repeated Spark",
+                "oracleText": null,
+                "typeLine": "Instant"
+              }
+            ],
+            "layout": "normal"
+          }
+        ],
+        "commanders": [
+          {
+            "cardId": "card_40000000-0000-4000-8000-000000000001",
+            "designation": "commander",
+            "faceId": null,
+            "parsedEntryId": "entry_40000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "entries": [
+          {
+            "cardId": "card_40000000-0000-4000-8000-000000000001",
+            "parsedEntryId": "entry_40000000-0000-4000-8000-000000000001",
+            "quantity": 1,
+            "section": "commander",
+            "status": "resolved"
+          },
+          {
+            "cardId": "card_40000000-0000-4000-8000-000000000002",
+            "parsedEntryId": "entry_40000000-0000-4000-8000-000000000002",
+            "quantity": 4,
+            "section": "mainboard",
+            "status": "resolved"
+          },
+          {
+            "cardId": "card_40000000-0000-4000-8000-000000000002",
+            "parsedEntryId": "entry_40000000-0000-4000-8000-000000000003",
+            "quantity": 4,
+            "section": "mainboard",
+            "status": "resolved"
+          }
+        ],
+        "format": "commander"
+      },
+      "parsedEntries": [
+        {
+          "collectorNumber": null,
+          "entryId": "entry_40000000-0000-4000-8000-000000000001",
+          "line": 1,
+          "name": "Synthetic Ember Chief",
+          "quantity": 1,
+          "section": "commander",
+          "setCode": null
+        },
+        {
+          "collectorNumber": null,
+          "entryId": "entry_40000000-0000-4000-8000-000000000002",
+          "line": 2,
+          "name": "Synthetic Repeated Spark",
+          "quantity": 4,
+          "section": "mainboard",
+          "setCode": null
+        },
+        {
+          "collectorNumber": null,
+          "entryId": "entry_40000000-0000-4000-8000-000000000003",
+          "line": 3,
+          "name": "Synthetic Repeated Spark",
+          "quantity": 4,
+          "section": "mainboard",
+          "setCode": null
+        }
+      ],
+      "rawInput": {
+        "format": "commander",
+        "inputId": "input_40000000-0000-4000-8000-000000000001",
+        "source": "paste",
+        "text": "1 Synthetic Ember Chief\n4 Synthetic Repeated Spark\n4 Synthetic Repeated Spark"
+      }
+    },
+    {
+      "caseId": "partner-background-synthetic",
+      "category": "partner-background",
+      "expected": {
+        "normalizedDeckValid": true,
+        "parsedEntriesValid": true,
+        "rawInputValid": true,
+        "reasonCodes": []
+      },
+      "normalizedDeck": {
+        "cards": [
+          {
+            "cardId": "card_50000000-0000-4000-8000-000000000001",
+            "colorIdentity": ["W"],
+            "commanderEligibility": "eligible",
+            "faces": [
+              {
+                "cardId": "card_50000000-0000-4000-8000-000000000001",
+                "colors": ["W"],
+                "faceId": "face_50000000-0000-4000-8000-000000000001",
+                "faceIndex": 0,
+                "manaCost": "{2}{W}",
+                "name": "Synthetic Background Seeker",
+                "oracleText": null,
+                "typeLine": "Legendary Creature — Test Adventurer"
+              }
+            ],
+            "layout": "normal"
+          },
+          {
+            "cardId": "card_50000000-0000-4000-8000-000000000002",
+            "colorIdentity": ["U"],
+            "commanderEligibility": "eligible",
+            "faces": [
+              {
+                "cardId": "card_50000000-0000-4000-8000-000000000002",
+                "colors": ["U"],
+                "faceId": "face_50000000-0000-4000-8000-000000000002",
+                "faceIndex": 0,
+                "manaCost": "{1}{U}",
+                "name": "Synthetic Learned Background",
+                "oracleText": null,
+                "typeLine": "Legendary Enchantment — Background"
+              }
+            ],
+            "layout": "normal"
+          }
+        ],
+        "commanders": [
+          {
+            "cardId": "card_50000000-0000-4000-8000-000000000001",
+            "designation": "partner",
+            "faceId": null,
+            "parsedEntryId": "entry_50000000-0000-4000-8000-000000000001"
+          },
+          {
+            "cardId": "card_50000000-0000-4000-8000-000000000002",
+            "designation": "background",
+            "faceId": null,
+            "parsedEntryId": "entry_50000000-0000-4000-8000-000000000002"
+          }
+        ],
+        "entries": [
+          {
+            "cardId": "card_50000000-0000-4000-8000-000000000001",
+            "parsedEntryId": "entry_50000000-0000-4000-8000-000000000001",
+            "quantity": 1,
+            "section": "commander",
+            "status": "resolved"
+          },
+          {
+            "cardId": "card_50000000-0000-4000-8000-000000000002",
+            "parsedEntryId": "entry_50000000-0000-4000-8000-000000000002",
+            "quantity": 1,
+            "section": "background",
+            "status": "resolved"
+          }
+        ],
+        "format": "commander"
+      },
+      "parsedEntries": [
+        {
+          "collectorNumber": null,
+          "entryId": "entry_50000000-0000-4000-8000-000000000001",
+          "line": 1,
+          "name": "Synthetic Background Seeker",
+          "quantity": 1,
+          "section": "commander",
+          "setCode": null
+        },
+        {
+          "collectorNumber": null,
+          "entryId": "entry_50000000-0000-4000-8000-000000000002",
+          "line": 2,
+          "name": "Synthetic Learned Background",
+          "quantity": 1,
+          "section": "background",
+          "setCode": null
+        }
+      ],
+      "rawInput": {
+        "format": "commander",
+        "inputId": "input_50000000-0000-4000-8000-000000000001",
+        "source": "paste",
+        "text": "1 Synthetic Background Seeker\n1 Synthetic Learned Background"
+      }
+    },
+    {
+      "caseId": "multi-face-synthetic",
+      "category": "multi-face",
+      "expected": {
+        "normalizedDeckValid": true,
+        "parsedEntriesValid": true,
+        "rawInputValid": true,
+        "reasonCodes": []
+      },
+      "normalizedDeck": {
+        "cards": [
+          {
+            "cardId": "card_60000000-0000-4000-8000-000000000001",
+            "colorIdentity": ["B", "R"],
+            "commanderEligibility": "eligible",
+            "faces": [
+              {
+                "cardId": "card_60000000-0000-4000-8000-000000000001",
+                "colors": ["B"],
+                "faceId": "face_60000000-0000-4000-8000-000000000001",
+                "faceIndex": 0,
+                "manaCost": "{2}{B}",
+                "name": "Synthetic Quiet Face",
+                "oracleText": null,
+                "typeLine": "Legendary Creature — Test Shapeshifter"
+              },
+              {
+                "cardId": "card_60000000-0000-4000-8000-000000000001",
+                "colors": ["R"],
+                "faceId": "face_60000000-0000-4000-8000-000000000002",
+                "faceIndex": 1,
+                "manaCost": null,
+                "name": "Synthetic Loud Face",
+                "oracleText": null,
+                "typeLine": "Legendary Creature — Test Shapeshifter"
+              }
+            ],
+            "layout": "transform"
+          }
+        ],
+        "commanders": [
+          {
+            "cardId": "card_60000000-0000-4000-8000-000000000001",
+            "designation": "commander",
+            "faceId": "face_60000000-0000-4000-8000-000000000001",
+            "parsedEntryId": "entry_60000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "entries": [
+          {
+            "cardId": "card_60000000-0000-4000-8000-000000000001",
+            "parsedEntryId": "entry_60000000-0000-4000-8000-000000000001",
+            "quantity": 1,
+            "section": "commander",
+            "status": "resolved"
+          }
+        ],
+        "format": "commander"
+      },
+      "parsedEntries": [
+        {
+          "collectorNumber": "1",
+          "entryId": "entry_60000000-0000-4000-8000-000000000001",
+          "line": 1,
+          "name": "Synthetic Quiet Face // Synthetic Loud Face",
+          "quantity": 1,
+          "section": "commander",
+          "setCode": "TST"
+        }
+      ],
+      "rawInput": {
+        "format": "commander",
+        "inputId": "input_60000000-0000-4000-8000-000000000001",
+        "source": "paste",
+        "text": "1 Synthetic Quiet Face // Synthetic Loud Face (TST) 1"
+      }
+    },
+    {
+      "caseId": "commander-specific-synthetic",
+      "category": "commander-specific",
+      "expected": {
+        "normalizedDeckValid": true,
+        "parsedEntriesValid": true,
+        "rawInputValid": true,
+        "reasonCodes": ["deck.invalid-commander"]
+      },
+      "normalizedDeck": {
+        "cards": [
+          {
+            "cardId": "card_70000000-0000-4000-8000-000000000001",
+            "colorIdentity": [],
+            "commanderEligibility": "ineligible",
+            "faces": [
+              {
+                "cardId": "card_70000000-0000-4000-8000-000000000001",
+                "colors": [],
+                "faceId": "face_70000000-0000-4000-8000-000000000001",
+                "faceIndex": 0,
+                "manaCost": "{3}",
+                "name": "Synthetic Nonlegendary Relic",
+                "oracleText": null,
+                "typeLine": "Artifact"
+              }
+            ],
+            "layout": "normal"
+          }
+        ],
+        "commanders": [
+          {
+            "cardId": "card_70000000-0000-4000-8000-000000000001",
+            "designation": "commander",
+            "faceId": null,
+            "parsedEntryId": "entry_70000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "entries": [
+          {
+            "cardId": "card_70000000-0000-4000-8000-000000000001",
+            "parsedEntryId": "entry_70000000-0000-4000-8000-000000000001",
+            "quantity": 1,
+            "section": "commander",
+            "status": "resolved"
+          }
+        ],
+        "format": "commander"
+      },
+      "parsedEntries": [
+        {
+          "collectorNumber": null,
+          "entryId": "entry_70000000-0000-4000-8000-000000000001",
+          "line": 1,
+          "name": "Synthetic Nonlegendary Relic",
+          "quantity": 1,
+          "section": "commander",
+          "setCode": null
+        }
+      ],
+      "rawInput": {
+        "format": "commander",
+        "inputId": "input_70000000-0000-4000-8000-000000000001",
+        "source": "paste",
+        "text": "1 Synthetic Nonlegendary Relic"
+      }
+    },
+    {
+      "caseId": "malformed-synthetic",
+      "category": "malformed",
+      "expected": {
+        "normalizedDeckValid": false,
+        "parsedEntriesValid": false,
+        "rawInputValid": false,
+        "reasonCodes": ["input.malformed"]
+      },
+      "normalizedDeck": {
+        "cards": [],
+        "commanders": [],
+        "entries": [],
+        "format": "commander"
+      },
+      "parsedEntries": [
+        {
+          "collectorNumber": null,
+          "entryId": "entry_80000000-0000-4000-8000-000000000001",
+          "line": 0,
+          "name": "",
+          "quantity": 0,
+          "section": "mainboard",
+          "setCode": null
+        }
+      ],
+      "rawInput": {
+        "format": "commander",
+        "inputId": "input_80000000-0000-4000-8000-000000000001",
+        "source": "paste",
+        "text": ""
+      }
+    }
+  ]
+}

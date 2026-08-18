@@ -77,17 +77,18 @@ a control, or make a public claim on the owner's behalf.
 
 ## Active handoff
 
-- **Active phase:** Phase 2 — Contracts, fixtures, and deterministic
-  serialization. All owner-independent Phase 0 and Phase 1 work is complete.
-- **Next recommended slice:** define branded canonical identifiers and the full
-  deck/revision/version/evidence contracts, then add deterministic serialization
-  and legal/malformed golden fixtures without importing external datasets.
+- **Active phase:** Phase 3 — PostgreSQL, jobs, configuration, and
+  observability. All owner-independent Phase 0 through Phase 2 work is complete.
+- **Next recommended slice:** implement the validated server-only configuration
+  boundary, then add the first reviewed Phase 3 Drizzle schemas and constraints
+  in checklist order without choosing an owner-blocked production service.
 - **Current blockers:** the production proxy mode, transactional email delivery
   provider, OCI registry, and off-site backup target require owner choices
   before their dependent release tasks can close.
-- **Last verified:** Node 24.19.0 frozen install; `pnpm verify` including live
-  PostgreSQL integration; cross-browser Playwright/axe smoke; development web,
-  worker, migration, and seed paths; and `docker compose config` on 2026-08-17.
+- **Last verified:** Node 24.19.0 frozen install; Phase 2 contract, fixture,
+  compatibility, golden-hash, generated-artifact, and consumer tests; the full
+  repository verify with live PostgreSQL integration; cross-browser
+  Playwright/axe smoke; and `docker compose config` on 2026-08-17.
 - **Production state:** no application is deployed; `podgauge.com` is a target,
   not a currently verified service.
 
@@ -119,6 +120,10 @@ Verified in the repository at the current reconciliation:
       refs matched `8869e36` before Phase 1 implementation began.
 - [x] The intended canonical host is `https://podgauge.com`, with
       `https://www.podgauge.com` redirecting to it once deployed.
+- [x] `packages/contracts` now owns strict runtime schemas for deck and report
+      documents, the full version tuple and evidence graph, job/API envelopes,
+      canonical serialization and hashing, generated JSON Schema/OpenAPI, and
+      independently authored synthetic compatibility and edge-case fixtures.
 
 Do not describe examples in the README as live results until the end-to-end
 scanner and production service are actually verified.
@@ -276,32 +281,32 @@ minimal web and worker development processes, and pass `pnpm verify`.
 Purpose: establish the portable language shared by UI, API, database, worker,
 engine, benchmarks, and future versions before implementing deep behavior.
 
-- [ ] Define branded canonical identifiers and Zod schemas for raw deck input,
+- [x] Define branded canonical identifiers and Zod schemas for raw deck input,
       parsed entries, normalized cards/faces, commanders, decks, and immutable
       deck revisions.
-- [ ] Define the full version tuple and schemas for card-data snapshots, policy
+- [x] Define the full version tuple and schemas for card-data snapshots, policy
       versions, engine versions, benchmark versions, simulation versions, and
       report-schema versions. Reject missing or ambiguous version inputs.
-- [ ] Define structured evidence, reason codes, findings, unknown
+- [x] Define structured evidence, reason codes, findings, unknown
       classifications, dependency edges, shared failure points, and source
       provenance without UI prose in core contracts.
-- [ ] Define the versioned analysis-report schema for all public outputs and six
+- [x] Define the versioned analysis-report schema for all public outputs and six
       Deckprint dimensions, including confidence and uncertainty rather than
       false precision.
-- [ ] Define job payloads, progress events, terminal states, retry metadata,
+- [x] Define job payloads, progress events, terminal states, retry metadata,
       analysis options, and idempotency keys. Validate payloads on both enqueue
       and execution.
-- [ ] Define RFC 9457 problem-details responses and generate a checked-in
+- [x] Define RFC 9457 problem-details responses and generate a checked-in
       OpenAPI 3.1 contract for the initial `/api/v1` surface.
-- [ ] Implement canonical stable serialization, explicit stable sorting, report
+- [x] Implement canonical stable serialization, explicit stable sorting, report
       hashing, and golden test vectors that are independent of OS, locale, input
       ordering, and wall-clock time.
-- [ ] Generate JSON Schema from shared sources where practical and add a drift
+- [x] Generate JSON Schema from shared sources where practical and add a drift
       check so committed OpenAPI/JSON artifacts cannot silently become stale.
-- [ ] Add legal, illegal, incomplete, duplicate-heavy, partner/background,
+- [x] Add legal, illegal, incomplete, duplicate-heavy, partner/background,
       multi-face, Commander-specific, and malformed deck fixtures with expected
       parse and schema outcomes.
-- [ ] Add compatibility tests proving additive report changes remain readable
+- [x] Add compatibility tests proving additive report changes remain readable
       and breaking schema changes require a version increment and migration or
       explicit rejection path.
 
@@ -755,9 +760,10 @@ only after its prerequisite and acceptance criteria are documented.
 ## Known limits not to overclaim
 
 - PodGauge now has a runnable SSR shell, graceful worker, pure foundation
-  packages, and a development PostgreSQL schema. It still has no deck parser,
-  scanner/report engine, public analysis API, Graphile Worker queue, user-data
-  schema, PWA, calibration corpus, release image, or production deployment.
+  packages, a development PostgreSQL schema, and executable portable contracts
+  with synthetic fixtures. It still has no deck parser, scanner/report engine,
+  implemented public analysis API, Graphile Worker queue, user-data schema,
+  PWA, calibration corpus, release image, or production deployment.
 - The sample report in `README.md` illustrates the intended format and is not a
   result from a live scoring service.
 - No Capability thresholds, Deckprint weights, closing-window model, accuracy
@@ -814,6 +820,29 @@ or database code changed.
 The root `dev` path also served the SSR page and non-cacheable liveness endpoint
 while the worker reported `ready`, then reported `stopped` on SIGINT. Database
 seeding was repeated and remained one `development_fixture` row.
+
+### Verified Phase 2 contracts and deterministic serialization
+
+The following passed on 2026-08-17 under Node 24.19.0 and pnpm 11.22.0. The
+aggregate verify ran with live PostgreSQL integration against the healthy 18.4
+development service. The first optional benchmark run rejected its legacy flat
+version input as intended; its smoke consumer was migrated to the full tuple and
+the recorded rerun passed.
+
+```sh
+mise exec node@24.19.0 -- corepack pnpm install --frozen-lockfile
+mise exec node@24.19.0 -- corepack pnpm contracts:check
+PODGAUGE_RUN_DB_INTEGRATION=1 mise exec node@24.19.0 -- corepack pnpm verify
+mise exec node@24.19.0 -- corepack pnpm test:e2e
+mise exec node@24.19.0 -- corepack pnpm --filter @podgauge/worker smoke
+mise exec node@24.19.0 -- corepack pnpm data:sync
+mise exec node@24.19.0 -- corepack pnpm benchmark
+docker compose up -d --wait postgres
+mise exec node@24.19.0 -- corepack pnpm db:migrate
+mise exec node@24.19.0 -- corepack pnpm db:seed
+docker compose config
+git diff --check
+```
 
 ### Required fast gate after Phase 1
 

@@ -1,0 +1,138 @@
+{
+  "$defs": {
+    "__schema0": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "__schema1": {
+      "pattern": "^provenance_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "__schema2": {
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+      "type": "string"
+    }
+  },
+  "$id": "https://podgauge.com/schemas/SourceProvenance.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "authoredAt": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "contentHash": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "fixtureId": {
+          "maxLength": 128,
+          "pattern": "^fixture\\.[a-z0-9]+(?:[.-][a-z0-9]+)*$",
+          "type": "string"
+        },
+        "provenanceId": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "sourceKind": {
+          "const": "synthetic",
+          "type": "string"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "contentHash",
+        "provenanceId",
+        "authoredAt",
+        "fixtureId",
+        "sourceKind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "contentHash": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "privacy": {
+          "const": "private",
+          "type": "string"
+        },
+        "provenanceId": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "receivedAt": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "sourceKind": {
+          "const": "user-input",
+          "type": "string"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "contentHash",
+        "provenanceId",
+        "privacy",
+        "receivedAt",
+        "sourceKind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "contentHash": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "provenanceId": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "provider": {
+          "enum": [
+            "commander-spellbook",
+            "scryfall",
+            "topdeck",
+            "wizards-policy",
+            "other-reviewed"
+          ],
+          "type": "string"
+        },
+        "retrievedAt": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "sourceKind": {
+          "const": "external",
+          "type": "string"
+        },
+        "sourceRecordId": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+        },
+        "sourceUrl": {
+          "format": "uri",
+          "type": "string"
+        },
+        "termsReviewId": {
+          "pattern": "^review_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "type": "string"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "contentHash",
+        "provenanceId",
+        "provider",
+        "retrievedAt",
+        "sourceKind",
+        "sourceRecordId",
+        "sourceUrl",
+        "termsReviewId"
+      ],
+      "type": "object"
+    }
+  ],
+  "title": "SourceProvenance"
+}

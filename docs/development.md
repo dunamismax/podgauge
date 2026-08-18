@@ -1,8 +1,8 @@
 # Local development
 
 PodGauge currently provides a minimal SSR web application, a separate graceful
-worker, pure package boundaries, and a development PostgreSQL schema. It does
-not analyze decks yet.
+worker, pure package boundaries, a portable generated contract layer, and a
+development PostgreSQL schema. It does not parse or analyze decks yet.
 
 ## Prerequisites
 
@@ -49,6 +49,8 @@ ignored. The application foundation currently needs no third-party credentials.
 | `corepack pnpm format` / `format:check`         | Write or verify repository formatting                                  |
 | `corepack pnpm lint`                            | Run ESLint and package/engine dependency guards                        |
 | `corepack pnpm check`                           | Run strict TypeScript and Svelte diagnostics                           |
+| `corepack pnpm contracts:generate`              | Regenerate JSON Schema and OpenAPI from authoritative Zod schemas      |
+| `corepack pnpm contracts:check`                 | Fail when checked-in contract artifacts drift from their Zod sources   |
 | `corepack pnpm test`                            | Run unit, component, and property tests                                |
 | `corepack pnpm test:integration`                | Exercise the worker as a real child process                            |
 | `corepack pnpm test:e2e`                        | Run the built app in Chromium, Firefox, and WebKit with axe checks     |
@@ -78,10 +80,12 @@ is skipped so the fast gate remains usable on a machine without Docker.
 
 ## Fixtures and external data
 
-The seed writes only a `foundation-v1` metadata row. There is no card-data
-fixture or external import yet. `data:sync` intentionally lists every source as
-blocked until its current terms, retention, redistribution, attribution, and
-provenance review is approved under `docs/data-governance.md`.
+The seed writes only a `foundation-v1` metadata row. The repository includes
+tiny independently authored synthetic contract fixtures, but no approved
+card-data snapshot or external import. `data:sync` intentionally lists every
+source as blocked until its current terms, retention, redistribution,
+attribution, and provenance review is approved under
+`docs/data-governance.md`.
 
 ## Troubleshooting
 
@@ -96,9 +100,12 @@ provenance review is approved under `docs/data-governance.md`.
 - **Migration connection refused:** run `docker compose up -d --wait postgres`
   and inspect `docker compose ps` plus `docker compose logs postgres`.
 - **Missing Playwright executable:** run the browser installation command above.
-- **Stale generated state:** remove ignored `dist`, `build`, and `.svelte-kit`
+- **Stale build output:** remove ignored `dist`, `build`, and `.svelte-kit`
   directories, then rerun `corepack pnpm verify`. Do not delete source or the
   PostgreSQL volume.
+- **Contract drift:** run `corepack pnpm contracts:generate`, review the JSON
+  diff, and rerun `corepack pnpm contracts:check`. Do not edit generated JSON
+  by hand.
 
 ## Teardown
 

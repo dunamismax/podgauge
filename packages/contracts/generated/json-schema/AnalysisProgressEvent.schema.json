@@ -1,0 +1,304 @@
+{
+  "$defs": {
+    "__schema0": {
+      "pattern": "^analysis_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "__schema1": {
+      "pattern": "^event_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "__schema2": {
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+      "type": "string"
+    },
+    "__schema3": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "__schema4": {
+      "maximum": 10,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "__schema5": {
+      "maximum": 10,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "__schema6": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/__schema2"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "__schema7": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z0-9-]+)+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "$id": "https://podgauge.com/schemas/AnalysisProgressEvent.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "analysisId": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "eventId": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "sequence": {
+          "$ref": "#/$defs/__schema3"
+        },
+        "state": {
+          "const": "queued",
+          "type": "string"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "analysisId",
+        "eventId",
+        "occurredAt",
+        "sequence",
+        "state"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "analysisId": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "eventId": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "sequence": {
+          "$ref": "#/$defs/__schema3"
+        },
+        "stage": {
+          "enum": [
+            "normalizing",
+            "validating",
+            "applying-policy",
+            "building-graph",
+            "analyzing",
+            "simulating",
+            "serializing"
+          ],
+          "type": "string"
+        },
+        "state": {
+          "const": "running",
+          "type": "string"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "analysisId",
+        "eventId",
+        "occurredAt",
+        "sequence",
+        "stage",
+        "state"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "analysisId": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "eventId": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "retry": {
+          "additionalProperties": false,
+          "properties": {
+            "attempt": {
+              "$ref": "#/$defs/__schema4"
+            },
+            "maxAttempts": {
+              "$ref": "#/$defs/__schema5"
+            },
+            "nextAttemptAt": {
+              "$ref": "#/$defs/__schema6"
+            },
+            "previousFailureCode": {
+              "$ref": "#/$defs/__schema7"
+            }
+          },
+          "readOnly": true,
+          "required": [
+            "attempt",
+            "maxAttempts",
+            "nextAttemptAt",
+            "previousFailureCode"
+          ],
+          "type": "object"
+        },
+        "sequence": {
+          "$ref": "#/$defs/__schema3"
+        },
+        "state": {
+          "const": "retrying",
+          "type": "string"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "analysisId",
+        "eventId",
+        "occurredAt",
+        "sequence",
+        "retry",
+        "state"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "analysisId": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "eventId": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "reportHash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "reportId": {
+          "pattern": "^report_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        "sequence": {
+          "$ref": "#/$defs/__schema3"
+        },
+        "state": {
+          "const": "completed",
+          "type": "string"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "analysisId",
+        "eventId",
+        "occurredAt",
+        "sequence",
+        "reportHash",
+        "reportId",
+        "state"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "analysisId": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "eventId": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "failureCode": {
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z0-9-]+)+$",
+          "type": "string"
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "sequence": {
+          "$ref": "#/$defs/__schema3"
+        },
+        "state": {
+          "const": "failed",
+          "type": "string"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "analysisId",
+        "eventId",
+        "occurredAt",
+        "sequence",
+        "failureCode",
+        "retryable",
+        "state"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "analysisId": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "eventId": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "reasonCode": {
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z0-9-]+)+$",
+          "type": "string"
+        },
+        "sequence": {
+          "$ref": "#/$defs/__schema3"
+        },
+        "state": {
+          "const": "cancelled",
+          "type": "string"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "analysisId",
+        "eventId",
+        "occurredAt",
+        "sequence",
+        "reasonCode",
+        "state"
+      ],
+      "type": "object"
+    }
+  ],
+  "title": "AnalysisProgressEvent"
+}

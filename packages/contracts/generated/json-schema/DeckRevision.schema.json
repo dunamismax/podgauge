@@ -1,0 +1,548 @@
+{
+  "$defs": {
+    "__schema0": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "__schema1": {
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+      "type": "string"
+    },
+    "__schema10": {
+      "items": {
+        "$ref": "#/$defs/__schema11"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "readOnly": true,
+      "type": "array"
+    },
+    "__schema11": {
+      "additionalProperties": false,
+      "properties": {
+        "cardId": {
+          "$ref": "#/$defs/__schema6"
+        },
+        "colors": {
+          "$ref": "#/$defs/__schema7"
+        },
+        "faceId": {
+          "$ref": "#/$defs/__schema12"
+        },
+        "faceIndex": {
+          "maximum": 7,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "manaCost": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "$ref": "#/$defs/__schema13"
+        },
+        "oracleText": {
+          "anyOf": [
+            {
+              "maxLength": 16384,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "typeLine": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "cardId",
+        "colors",
+        "faceId",
+        "faceIndex",
+        "manaCost",
+        "name",
+        "oracleText",
+        "typeLine"
+      ],
+      "type": "object"
+    },
+    "__schema12": {
+      "pattern": "^face_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "__schema13": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+    },
+    "__schema14": {
+      "enum": [
+        "normal",
+        "split",
+        "transform",
+        "modal-double-faced",
+        "adventure",
+        "meld",
+        "other"
+      ],
+      "type": "string"
+    },
+    "__schema15": {
+      "items": {
+        "$ref": "#/$defs/__schema16"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "readOnly": true,
+      "type": "array"
+    },
+    "__schema16": {
+      "additionalProperties": false,
+      "properties": {
+        "cardId": {
+          "$ref": "#/$defs/__schema6"
+        },
+        "designation": {
+          "enum": [
+            "commander",
+            "partner",
+            "background",
+            "doctors-companion"
+          ],
+          "type": "string"
+        },
+        "faceId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/__schema12"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parsedEntryId": {
+          "$ref": "#/$defs/__schema17"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "cardId",
+        "designation",
+        "faceId",
+        "parsedEntryId"
+      ],
+      "type": "object"
+    },
+    "__schema17": {
+      "pattern": "^entry_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "__schema18": {
+      "items": {
+        "$ref": "#/$defs/__schema19"
+      },
+      "maxItems": 500,
+      "minItems": 1,
+      "readOnly": true,
+      "type": "array"
+    },
+    "__schema19": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "cardId": {
+              "$ref": "#/$defs/__schema6"
+            },
+            "parsedEntryId": {
+              "$ref": "#/$defs/__schema17"
+            },
+            "quantity": {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "section": {
+              "$ref": "#/$defs/__schema20"
+            },
+            "status": {
+              "const": "resolved",
+              "type": "string"
+            }
+          },
+          "readOnly": true,
+          "required": [
+            "cardId",
+            "parsedEntryId",
+            "quantity",
+            "section",
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "parsedEntryId": {
+              "$ref": "#/$defs/__schema17"
+            },
+            "quantity": {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "reason": {
+              "enum": [
+                "no-match",
+                "missing-card-data",
+                "unsupported-syntax"
+              ],
+              "type": "string"
+            },
+            "section": {
+              "$ref": "#/$defs/__schema20"
+            },
+            "status": {
+              "const": "unresolved",
+              "type": "string"
+            }
+          },
+          "readOnly": true,
+          "required": [
+            "parsedEntryId",
+            "quantity",
+            "reason",
+            "section",
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "candidateCardIds": {
+              "items": {
+                "$ref": "#/$defs/__schema6"
+              },
+              "maxItems": 32,
+              "minItems": 2,
+              "readOnly": true,
+              "type": "array"
+            },
+            "parsedEntryId": {
+              "$ref": "#/$defs/__schema17"
+            },
+            "quantity": {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "section": {
+              "$ref": "#/$defs/__schema20"
+            },
+            "status": {
+              "const": "ambiguous",
+              "type": "string"
+            }
+          },
+          "readOnly": true,
+          "required": [
+            "candidateCardIds",
+            "parsedEntryId",
+            "quantity",
+            "section",
+            "status"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "__schema2": {
+      "pattern": "^deck_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "__schema20": {
+      "enum": [
+        "commander",
+        "mainboard",
+        "sideboard",
+        "maybeboard",
+        "background",
+        "companion"
+      ],
+      "type": "string"
+    },
+    "__schema21": {
+      "const": "commander",
+      "type": "string"
+    },
+    "__schema22": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000,
+      "type": "integer"
+    },
+    "__schema23": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/__schema24"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "__schema24": {
+      "pattern": "^revision_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "__schema25": {
+      "items": {
+        "$ref": "#/$defs/__schema26"
+      },
+      "maxItems": 500,
+      "minItems": 1,
+      "readOnly": true,
+      "type": "array"
+    },
+    "__schema26": {
+      "additionalProperties": false,
+      "properties": {
+        "collectorNumber": {
+          "anyOf": [
+            {
+              "maxLength": 32,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entryId": {
+          "$ref": "#/$defs/__schema17"
+        },
+        "line": {
+          "maximum": 2000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "name": {
+          "$ref": "#/$defs/__schema13"
+        },
+        "quantity": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "#/$defs/__schema20"
+        },
+        "setCode": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z0-9]{2,8}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "collectorNumber",
+        "entryId",
+        "line",
+        "name",
+        "quantity",
+        "section",
+        "setCode"
+      ],
+      "type": "object"
+    },
+    "__schema27": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "const": "commander",
+          "type": "string"
+        },
+        "inputId": {
+          "pattern": "^input_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        "source": {
+          "const": "paste",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 262144,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "format",
+        "inputId",
+        "source",
+        "text"
+      ],
+      "type": "object"
+    },
+    "__schema3": {
+      "additionalProperties": false,
+      "properties": {
+        "cards": {
+          "$ref": "#/$defs/__schema4"
+        },
+        "commanders": {
+          "$ref": "#/$defs/__schema15"
+        },
+        "entries": {
+          "$ref": "#/$defs/__schema18"
+        },
+        "format": {
+          "$ref": "#/$defs/__schema21"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "cards",
+        "commanders",
+        "entries",
+        "format"
+      ],
+      "type": "object"
+    },
+    "__schema4": {
+      "items": {
+        "$ref": "#/$defs/__schema5"
+      },
+      "maxItems": 500,
+      "readOnly": true,
+      "type": "array"
+    },
+    "__schema5": {
+      "additionalProperties": false,
+      "properties": {
+        "cardId": {
+          "$ref": "#/$defs/__schema6"
+        },
+        "colorIdentity": {
+          "$ref": "#/$defs/__schema7"
+        },
+        "commanderEligibility": {
+          "$ref": "#/$defs/__schema9"
+        },
+        "faces": {
+          "$ref": "#/$defs/__schema10"
+        },
+        "layout": {
+          "$ref": "#/$defs/__schema14"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "cardId",
+        "colorIdentity",
+        "commanderEligibility",
+        "faces",
+        "layout"
+      ],
+      "type": "object"
+    },
+    "__schema6": {
+      "pattern": "^card_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "__schema7": {
+      "items": {
+        "$ref": "#/$defs/__schema8"
+      },
+      "maxItems": 5,
+      "readOnly": true,
+      "type": "array"
+    },
+    "__schema8": {
+      "enum": [
+        "W",
+        "U",
+        "B",
+        "R",
+        "G"
+      ],
+      "type": "string"
+    },
+    "__schema9": {
+      "enum": [
+        "eligible",
+        "ineligible",
+        "unknown"
+      ],
+      "type": "string"
+    }
+  },
+  "$id": "https://podgauge.com/schemas/DeckRevision.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contentHash": {
+      "$ref": "#/$defs/__schema0"
+    },
+    "createdAt": {
+      "$ref": "#/$defs/__schema1"
+    },
+    "deckId": {
+      "$ref": "#/$defs/__schema2"
+    },
+    "normalizedDeck": {
+      "$ref": "#/$defs/__schema3"
+    },
+    "ordinal": {
+      "$ref": "#/$defs/__schema22"
+    },
+    "parentRevisionId": {
+      "$ref": "#/$defs/__schema23"
+    },
+    "parsedEntries": {
+      "$ref": "#/$defs/__schema25"
+    },
+    "rawInput": {
+      "$ref": "#/$defs/__schema27"
+    },
+    "revisionId": {
+      "$ref": "#/$defs/__schema24"
+    }
+  },
+  "readOnly": true,
+  "required": [
+    "contentHash",
+    "createdAt",
+    "deckId",
+    "normalizedDeck",
+    "ordinal",
+    "parentRevisionId",
+    "parsedEntries",
+    "rawInput",
+    "revisionId"
+  ],
+  "title": "DeckRevision",
+  "type": "object"
+}

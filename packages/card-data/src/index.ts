@@ -1,3 +1,4 @@
+import { NormalizedCardSchema, type NormalizedCard } from '@podgauge/contracts';
 import { z } from 'zod';
 
 export const SourceApprovalSchema = z
@@ -26,4 +27,8 @@ export function assertSourceApproved(source: BlockedSource): never {
   throw new Error(
     `Source ${parsed.source} is blocked pending a dated data-governance review`,
   );
+}
+
+export function readNormalizedCard(input: unknown): NormalizedCard {
+  return NormalizedCardSchema.parse(input);
 }

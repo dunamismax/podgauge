@@ -16,6 +16,8 @@
     "build": "pnpm --recursive --if-present build",
     "build:packages": "pnpm --filter './packages/**' --recursive build",
     "check": "pnpm --recursive --if-present check",
+    "contracts:check": "tsx packages/contracts/scripts/generate-artifacts.ts --check",
+    "contracts:generate": "tsx packages/contracts/scripts/generate-artifacts.ts --write",
     "data:sync": "pnpm --filter @podgauge/card-data data:sync",
     "db:generate": "pnpm --filter @podgauge/db db:generate",
     "db:migrate": "pnpm --filter @podgauge/db db:migrate",
@@ -27,7 +29,7 @@
     "test": "vitest run",
     "test:e2e": "pnpm --filter @podgauge/web test:e2e",
     "test:integration": "pnpm build:packages && pnpm --filter @podgauge/worker build && vitest run --config vitest.integration.config.ts",
-    "verify": "pnpm format:check && pnpm lint && pnpm check && pnpm test && pnpm test:integration && pnpm build"
+    "verify": "pnpm format:check && pnpm lint && pnpm check && pnpm contracts:check && pnpm test && pnpm test:integration && pnpm build"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

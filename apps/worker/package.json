@@ -17,6 +17,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@podgauge/contracts": "workspace:*",
     "@podgauge/observability": "workspace:*",
     "zod": "4.4.3"
   },

@@ -7,5 +7,7 @@ dist
 docs/spec.md
 node_modules
 playwright-report
+packages/contracts/generated/json-schema
+packages/contracts/generated/openapi.v1.json
 pnpm-lock.yaml
 test-results

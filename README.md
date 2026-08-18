@@ -201,10 +201,11 @@ docs/                    Product, method, architecture, and operations docs
 infra/                   Compose, Caddy, backup, and deployment assets
 ```
 
-The first runnable foundation has landed. It serves a minimal SSR application,
-runs a separate graceful worker, enforces package boundaries, and provides a
-loopback-only PostgreSQL 18 development service. It does **not** analyze decks
-yet.
+The first runnable foundation and portable contract layer have landed. The
+repository serves a minimal SSR application, runs a separate graceful worker,
+enforces package boundaries, validates versioned analysis documents, and
+provides a loopback-only PostgreSQL 18 development service. It does **not**
+parse or analyze decks yet.
 
 With Node 24.19.0, Corepack, and Docker installed:
 

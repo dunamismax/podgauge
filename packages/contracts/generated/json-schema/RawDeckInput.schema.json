@@ -1,0 +1,33 @@
+{
+  "$id": "https://podgauge.com/schemas/RawDeckInput.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "commander",
+      "type": "string"
+    },
+    "inputId": {
+      "pattern": "^input_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "source": {
+      "const": "paste",
+      "type": "string"
+    },
+    "text": {
+      "maxLength": 262144,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "readOnly": true,
+  "required": [
+    "format",
+    "inputId",
+    "source",
+    "text"
+  ],
+  "title": "RawDeckInput",
+  "type": "object"
+}

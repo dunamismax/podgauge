@@ -15,6 +15,7 @@
     "data:sync": "tsx src/sync.ts"
   },
   "dependencies": {
+    "@podgauge/contracts": "workspace:*",
     "zod": "4.4.3"
   },
   "devDependencies": {

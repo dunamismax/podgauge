@@ -1,0 +1,115 @@
+{
+  "$defs": {
+    "__schema0": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+        },
+        "pointer": {
+          "maxLength": 2048,
+          "pattern": "^(?:\\/(?:[^~/]|~0|~1)*)*$",
+          "type": "string"
+        },
+        "reasonCode": {
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z0-9-]+)+$",
+          "type": "string"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "name",
+        "pointer",
+        "reasonCode"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://podgauge.com/schemas/ProblemDetails.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "enum": [
+        "request.invalid",
+        "request.too-large",
+        "resource.not-found",
+        "resource.conflict",
+        "authorization.denied",
+        "quota.exceeded",
+        "analysis.failed",
+        "service.unavailable"
+      ],
+      "type": "string"
+    },
+    "detail": {
+      "anyOf": [
+        {
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "instance": {
+      "anyOf": [
+        {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "invalidParameters": {
+      "items": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "maxItems": 128,
+      "readOnly": true,
+      "type": "array"
+    },
+    "status": {
+      "maximum": 599,
+      "minimum": 400,
+      "type": "integer"
+    },
+    "title": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+    },
+    "type": {
+      "anyOf": [
+        {
+          "const": "about:blank",
+          "type": "string"
+        },
+        {
+          "format": "uri",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "readOnly": true,
+  "required": [
+    "code",
+    "detail",
+    "instance",
+    "invalidParameters",
+    "status",
+    "title",
+    "type"
+  ],
+  "title": "ProblemDetails",
+  "type": "object"
+}

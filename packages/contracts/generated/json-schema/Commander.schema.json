@@ -1,0 +1,44 @@
+{
+  "$id": "https://podgauge.com/schemas/Commander.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "cardId": {
+      "pattern": "^card_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "designation": {
+      "enum": [
+        "commander",
+        "partner",
+        "background",
+        "doctors-companion"
+      ],
+      "type": "string"
+    },
+    "faceId": {
+      "anyOf": [
+        {
+          "pattern": "^face_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "parsedEntryId": {
+      "pattern": "^entry_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    }
+  },
+  "readOnly": true,
+  "required": [
+    "cardId",
+    "designation",
+    "faceId",
+    "parsedEntryId"
+  ],
+  "title": "Commander",
+  "type": "object"
+}

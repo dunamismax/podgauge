@@ -7,6 +7,39 @@ const semver = fc
   .tuple(fc.nat({ max: 99 }), fc.nat({ max: 99 }), fc.nat({ max: 99 }))
   .map(([major, minor, patch]) => `${major}.${minor}.${patch}`);
 
+function context(version: string, seed: string) {
+  return {
+    seed,
+    versions: {
+      benchmark: {
+        benchmarkVersionId: 'benchmark_00000000-0000-4000-8000-000000000001',
+        version,
+      },
+      cardData: {
+        snapshotId: 'card-data_00000000-0000-4000-8000-000000000001',
+        version,
+      },
+      engine: {
+        engineVersionId: 'engine_00000000-0000-4000-8000-000000000001',
+        version,
+      },
+      policy: {
+        policyVersionId: 'policy_00000000-0000-4000-8000-000000000001',
+        version,
+      },
+      reportSchema: {
+        reportSchemaVersionId:
+          'report-schema_00000000-0000-4000-8000-000000000001',
+        version,
+      },
+      simulation: {
+        simulationVersionId: 'simulation_00000000-0000-4000-8000-000000000001',
+        version,
+      },
+    },
+  };
+}
+
 describe('deterministic engine foundation', () => {
   it('is independent of object insertion order', () => {
     fc.assert(
@@ -14,23 +47,17 @@ describe('deterministic engine foundation', () => {
         semver,
         fc.string({ minLength: 1, maxLength: 32 }),
         (version, seed) => {
-          const forward = {
-            benchmarkVersion: version,
-            cardDataVersion: version,
-            engineVersion: version,
-            policyVersion: version,
-            reportSchemaVersion: version,
-            seed,
-            simulationVersion: version,
-          };
+          const forward = context(version, seed);
           const reverse = {
-            simulationVersion: version,
+            versions: {
+              simulation: forward.versions.simulation,
+              reportSchema: forward.versions.reportSchema,
+              policy: forward.versions.policy,
+              engine: forward.versions.engine,
+              cardData: forward.versions.cardData,
+              benchmark: forward.versions.benchmark,
+            },
             seed,
-            reportSchemaVersion: version,
-            policyVersion: version,
-            engineVersion: version,
-            cardDataVersion: version,
-            benchmarkVersion: version,
           };
 
           expect(createContextFingerprint(forward)).toBe(
@@ -41,19 +68,12 @@ describe('deterministic engine foundation', () => {
     );
   });
 
-  it('includes every reproducibility input', () => {
-    const fingerprint = createContextFingerprint({
-      benchmarkVersion: '6.0.0',
-      cardDataVersion: '3.0.0',
-      engineVersion: '1.0.0',
-      policyVersion: '2.0.0',
-      reportSchemaVersion: '4.0.0',
-      seed: 'seven',
-      simulationVersion: '5.0.0',
-    });
+  it('includes every reproducibility input and immutable record identifier', () => {
+    const fingerprint = createContextFingerprint(context('1.2.3', 'seven'));
 
-    expect(fingerprint).toContain('engineVersion=1.0.0');
-    expect(fingerprint).toContain('simulationVersion=5.0.0');
-    expect(fingerprint).toContain('seed=seven');
+    expect(fingerprint).toContain('"engineVersionId":"engine_');
+    expect(fingerprint).toContain('"simulationVersionId":"simulation_');
+    expect(fingerprint).toContain('"seed":"seven"');
+    expect(fingerprint).toContain('"version":"1.2.3"');
   });
 });

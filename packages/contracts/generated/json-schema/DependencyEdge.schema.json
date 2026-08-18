@@ -1,0 +1,189 @@
+{
+  "$defs": {
+    "__schema0": {
+      "pattern": "^evidence_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "__schema1": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "cardId": {
+              "pattern": "^card_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "type": "string"
+            },
+            "kind": {
+              "const": "card",
+              "type": "string"
+            }
+          },
+          "readOnly": true,
+          "required": [
+            "cardId",
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "faceId": {
+              "pattern": "^face_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "type": "string"
+            },
+            "kind": {
+              "const": "card-face",
+              "type": "string"
+            }
+          },
+          "readOnly": true,
+          "required": [
+            "faceId",
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "deck-entry",
+              "type": "string"
+            },
+            "parsedEntryId": {
+              "pattern": "^entry_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "type": "string"
+            }
+          },
+          "readOnly": true,
+          "required": [
+            "kind",
+            "parsedEntryId"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "policy-rule",
+              "type": "string"
+            },
+            "ruleId": {
+              "pattern": "^policy-rule_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "type": "string"
+            }
+          },
+          "readOnly": true,
+          "required": [
+            "kind",
+            "ruleId"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "dimension": {
+              "enum": [
+                "mana",
+                "access",
+                "cohesion",
+                "control",
+                "recovery",
+                "conversion"
+              ],
+              "type": "string"
+            },
+            "kind": {
+              "const": "deckprint-dimension",
+              "type": "string"
+            }
+          },
+          "readOnly": true,
+          "required": [
+            "dimension",
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "report",
+              "type": "string"
+            },
+            "reportId": {
+              "pattern": "^report_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "type": "string"
+            }
+          },
+          "readOnly": true,
+          "required": [
+            "kind",
+            "reportId"
+          ],
+          "type": "object"
+        }
+      ]
+    }
+  },
+  "$id": "https://podgauge.com/schemas/DependencyEdge.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "dependencyEdgeId": {
+      "pattern": "^dependency_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "evidenceIds": {
+      "items": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "readOnly": true,
+      "type": "array"
+    },
+    "from": {
+      "$ref": "#/$defs/__schema1"
+    },
+    "necessity": {
+      "enum": [
+        "required",
+        "optional",
+        "substitutable",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "relation": {
+      "enum": [
+        "requires",
+        "enables",
+        "pays-off",
+        "protects",
+        "recurs",
+        "finds",
+        "converts"
+      ],
+      "type": "string"
+    },
+    "to": {
+      "$ref": "#/$defs/__schema1"
+    }
+  },
+  "readOnly": true,
+  "required": [
+    "dependencyEdgeId",
+    "evidenceIds",
+    "from",
+    "necessity",
+    "relation",
+    "to"
+  ],
+  "title": "DependencyEdge",
+  "type": "object"
+}

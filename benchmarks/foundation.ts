@@ -4,13 +4,34 @@ import { createContextFingerprint } from '@podgauge/engine';
 
 const iterations = 10_000;
 const context = {
-  benchmarkVersion: '0.0.0',
-  cardDataVersion: '0.0.0',
-  engineVersion: '0.0.0',
-  policyVersion: '0.0.0',
-  reportSchemaVersion: '0.0.0',
   seed: 'foundation-smoke',
-  simulationVersion: '0.0.0',
+  versions: {
+    benchmark: {
+      benchmarkVersionId: 'benchmark_00000000-0000-4000-8000-000000000001',
+      version: '0.1.0',
+    },
+    cardData: {
+      snapshotId: 'card-data_00000000-0000-4000-8000-000000000001',
+      version: '0.1.0',
+    },
+    engine: {
+      engineVersionId: 'engine_00000000-0000-4000-8000-000000000001',
+      version: '0.1.0',
+    },
+    policy: {
+      policyVersionId: 'policy_00000000-0000-4000-8000-000000000001',
+      version: '0.1.0',
+    },
+    reportSchema: {
+      reportSchemaVersionId:
+        'report-schema_00000000-0000-4000-8000-000000000001',
+      version: '0.1.0',
+    },
+    simulation: {
+      simulationVersionId: 'simulation_00000000-0000-4000-8000-000000000001',
+      version: '0.1.0',
+    },
+  },
 };
 
 const startedAt = performance.now();

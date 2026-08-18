@@ -1,0 +1,100 @@
+{
+  "$id": "https://podgauge.com/schemas/CreateAnalysisRequest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "deck": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "const": "commander",
+          "type": "string"
+        },
+        "inputId": {
+          "pattern": "^input_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        "source": {
+          "const": "paste",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 262144,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "format",
+        "inputId",
+        "source",
+        "text"
+      ],
+      "type": "object"
+    },
+    "options": {
+      "additionalProperties": false,
+      "properties": {
+        "evidenceDetail": {
+          "enum": [
+            "summary",
+            "full"
+          ],
+          "type": "string"
+        },
+        "simulation": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "mode": {
+                  "const": "disabled",
+                  "type": "string"
+                }
+              },
+              "readOnly": true,
+              "required": [
+                "mode"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "iterations": {
+                  "maximum": 1000000,
+                  "minimum": 100,
+                  "type": "integer"
+                },
+                "mode": {
+                  "const": "seeded",
+                  "type": "string"
+                }
+              },
+              "readOnly": true,
+              "required": [
+                "iterations",
+                "mode"
+              ],
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "evidenceDetail",
+        "simulation"
+      ],
+      "type": "object"
+    }
+  },
+  "readOnly": true,
+  "required": [
+    "deck",
+    "options"
+  ],
+  "title": "CreateAnalysisRequest",
+  "type": "object"
+}

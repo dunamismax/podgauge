@@ -1,19 +1,6 @@
-import {
-  AnalysisContextSchema,
-  type AnalysisContext,
-} from '@podgauge/contracts';
+import { AnalysisContextSchema, stableSerialize } from '@podgauge/contracts';
 
-const contextKeys = [
-  'engineVersion',
-  'policyVersion',
-  'cardDataVersion',
-  'benchmarkVersion',
-  'reportSchemaVersion',
-  'simulationVersion',
-  'seed',
-] as const satisfies readonly (keyof AnalysisContext)[];
-
-export function createContextFingerprint(input: AnalysisContext): string {
+export function createContextFingerprint(input: unknown): string {
   const context = AnalysisContextSchema.parse(input);
-  return contextKeys.map((key) => `${key}=${context[key]}`).join('|');
+  return stableSerialize(context);
 }

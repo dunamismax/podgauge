@@ -1,0 +1,28 @@
+{
+  "$defs": {
+    "__schema0": {
+      "pattern": "^revision_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    }
+  },
+  "$id": "https://podgauge.com/schemas/CreatePodRequest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "deckRevisionIds": {
+      "items": {
+        "$ref": "#/$defs/__schema0"
+      },
+      "maxItems": 4,
+      "minItems": 4,
+      "readOnly": true,
+      "type": "array"
+    }
+  },
+  "readOnly": true,
+  "required": [
+    "deckRevisionIds"
+  ],
+  "title": "CreatePodRequest",
+  "type": "object"
+}

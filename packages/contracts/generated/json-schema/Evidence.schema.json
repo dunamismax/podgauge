@@ -1,0 +1,305 @@
+{
+  "$defs": {
+    "__schema0": {
+      "pattern": "^evidence_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "__schema1": {
+      "items": {
+        "$ref": "#/$defs/__schema2"
+      },
+      "maxItems": 32,
+      "readOnly": true,
+      "type": "array"
+    },
+    "__schema2": {
+      "pattern": "^provenance_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "__schema3": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+          "type": "string"
+        },
+        "value": {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "name",
+        "value"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://podgauge.com/schemas/Evidence.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "cardId": {
+          "pattern": "^card_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        "evidenceId": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "faceId": {
+          "anyOf": [
+            {
+              "pattern": "^face_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "const": "card",
+          "type": "string"
+        },
+        "provenanceIds": {
+          "$ref": "#/$defs/__schema1"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "evidenceId",
+        "provenanceIds",
+        "cardId",
+        "faceId",
+        "kind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "edgeId": {
+          "pattern": "^dependency_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        "evidenceId": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "kind": {
+          "const": "relationship",
+          "type": "string"
+        },
+        "provenanceIds": {
+          "$ref": "#/$defs/__schema1"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "evidenceId",
+        "provenanceIds",
+        "edgeId",
+        "kind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "evidenceId": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "kind": {
+          "const": "policy",
+          "type": "string"
+        },
+        "provenanceIds": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "ruleId": {
+          "pattern": "^policy-rule_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "type": "string"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "evidenceId",
+        "provenanceIds",
+        "kind",
+        "ruleId"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "evidenceId": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/__schema3"
+          },
+          "maxItems": 64,
+          "readOnly": true,
+          "type": "array"
+        },
+        "kind": {
+          "const": "calculation",
+          "type": "string"
+        },
+        "metric": {
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z0-9-]+)+$",
+          "type": "string"
+        },
+        "output": {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer"
+        },
+        "provenanceIds": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "scale": {
+          "exclusiveMinimum": 0,
+          "maximum": 1000000,
+          "type": "integer"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "evidenceId",
+        "provenanceIds",
+        "inputs",
+        "kind",
+        "metric",
+        "output",
+        "scale"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "evidenceId": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "iterations": {
+          "exclusiveMinimum": 0,
+          "maximum": 10000000,
+          "type": "integer"
+        },
+        "kind": {
+          "const": "simulation",
+          "type": "string"
+        },
+        "observation": {
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z0-9-]+)+$",
+          "type": "string"
+        },
+        "provenanceIds": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "seed": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+        },
+        "value": {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "evidenceId",
+        "provenanceIds",
+        "iterations",
+        "kind",
+        "observation",
+        "seed",
+        "value"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "benchmarkVersionId": {
+          "pattern": "^benchmark_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        "evidenceId": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "fixtureId": {
+          "maxLength": 128,
+          "pattern": "^fixture\\.[a-z0-9]+(?:[.-][a-z0-9]+)*$",
+          "type": "string"
+        },
+        "kind": {
+          "const": "benchmark",
+          "type": "string"
+        },
+        "metric": {
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z0-9-]+)+$",
+          "type": "string"
+        },
+        "provenanceIds": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "value": {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "evidenceId",
+        "provenanceIds",
+        "benchmarkVersionId",
+        "fixtureId",
+        "kind",
+        "metric",
+        "value"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "evidenceId": {
+          "$ref": "#/$defs/__schema0"
+        },
+        "kind": {
+          "const": "source",
+          "type": "string"
+        },
+        "provenanceIds": {
+          "$ref": "#/$defs/__schema1"
+        },
+        "sourceProvenanceId": {
+          "$ref": "#/$defs/__schema2"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "evidenceId",
+        "provenanceIds",
+        "kind",
+        "sourceProvenanceId"
+      ],
+      "type": "object"
+    }
+  ],
+  "title": "Evidence"
+}

@@ -1,0 +1,313 @@
+{
+  "$defs": {
+    "__schema0": {
+      "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$",
+      "type": "string"
+    },
+    "__schema1": {
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+      "type": "string"
+    },
+    "__schema2": {
+      "maximum": 10,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "__schema3": {
+      "maximum": 10,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "__schema4": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/__schema1"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "__schema5": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z0-9-]+)+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "$id": "https://podgauge.com/schemas/AnalyzeDeckJobPayload.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "analysisId": {
+      "pattern": "^analysis_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "context": {
+      "additionalProperties": false,
+      "properties": {
+        "seed": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+        },
+        "versions": {
+          "additionalProperties": false,
+          "properties": {
+            "benchmark": {
+              "additionalProperties": false,
+              "properties": {
+                "benchmarkVersionId": {
+                  "pattern": "^benchmark_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+                  "type": "string"
+                },
+                "version": {
+                  "$ref": "#/$defs/__schema0"
+                }
+              },
+              "readOnly": true,
+              "required": [
+                "benchmarkVersionId",
+                "version"
+              ],
+              "type": "object"
+            },
+            "cardData": {
+              "additionalProperties": false,
+              "properties": {
+                "snapshotId": {
+                  "pattern": "^card-data_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+                  "type": "string"
+                },
+                "version": {
+                  "$ref": "#/$defs/__schema0"
+                }
+              },
+              "readOnly": true,
+              "required": [
+                "snapshotId",
+                "version"
+              ],
+              "type": "object"
+            },
+            "engine": {
+              "additionalProperties": false,
+              "properties": {
+                "engineVersionId": {
+                  "pattern": "^engine_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+                  "type": "string"
+                },
+                "version": {
+                  "$ref": "#/$defs/__schema0"
+                }
+              },
+              "readOnly": true,
+              "required": [
+                "engineVersionId",
+                "version"
+              ],
+              "type": "object"
+            },
+            "policy": {
+              "additionalProperties": false,
+              "properties": {
+                "policyVersionId": {
+                  "pattern": "^policy_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+                  "type": "string"
+                },
+                "version": {
+                  "$ref": "#/$defs/__schema0"
+                }
+              },
+              "readOnly": true,
+              "required": [
+                "policyVersionId",
+                "version"
+              ],
+              "type": "object"
+            },
+            "reportSchema": {
+              "additionalProperties": false,
+              "properties": {
+                "reportSchemaVersionId": {
+                  "pattern": "^report-schema_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+                  "type": "string"
+                },
+                "version": {
+                  "$ref": "#/$defs/__schema0"
+                }
+              },
+              "readOnly": true,
+              "required": [
+                "reportSchemaVersionId",
+                "version"
+              ],
+              "type": "object"
+            },
+            "simulation": {
+              "additionalProperties": false,
+              "properties": {
+                "simulationVersionId": {
+                  "pattern": "^simulation_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+                  "type": "string"
+                },
+                "version": {
+                  "$ref": "#/$defs/__schema0"
+                }
+              },
+              "readOnly": true,
+              "required": [
+                "simulationVersionId",
+                "version"
+              ],
+              "type": "object"
+            }
+          },
+          "readOnly": true,
+          "required": [
+            "benchmark",
+            "cardData",
+            "engine",
+            "policy",
+            "reportSchema",
+            "simulation"
+          ],
+          "type": "object"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "seed",
+        "versions"
+      ],
+      "type": "object"
+    },
+    "deckRevisionId": {
+      "pattern": "^revision_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "idempotencyKey": {
+      "maxLength": 128,
+      "minLength": 16,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+      "type": "string"
+    },
+    "jobId": {
+      "pattern": "^job_[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "type": "string"
+    },
+    "jobKind": {
+      "const": "analyze-deck",
+      "type": "string"
+    },
+    "options": {
+      "additionalProperties": false,
+      "properties": {
+        "evidenceDetail": {
+          "enum": [
+            "summary",
+            "full"
+          ],
+          "type": "string"
+        },
+        "simulation": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "mode": {
+                  "const": "disabled",
+                  "type": "string"
+                }
+              },
+              "readOnly": true,
+              "required": [
+                "mode"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "iterations": {
+                  "maximum": 1000000,
+                  "minimum": 100,
+                  "type": "integer"
+                },
+                "mode": {
+                  "const": "seeded",
+                  "type": "string"
+                }
+              },
+              "readOnly": true,
+              "required": [
+                "iterations",
+                "mode"
+              ],
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "evidenceDetail",
+        "simulation"
+      ],
+      "type": "object"
+    },
+    "payloadVersion": {
+      "$ref": "#/$defs/__schema0"
+    },
+    "requestedAt": {
+      "$ref": "#/$defs/__schema1"
+    },
+    "retry": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt": {
+          "$ref": "#/$defs/__schema2"
+        },
+        "maxAttempts": {
+          "$ref": "#/$defs/__schema3"
+        },
+        "nextAttemptAt": {
+          "$ref": "#/$defs/__schema4"
+        },
+        "previousFailureCode": {
+          "$ref": "#/$defs/__schema5"
+        }
+      },
+      "readOnly": true,
+      "required": [
+        "attempt",
+        "maxAttempts",
+        "nextAttemptAt",
+        "previousFailureCode"
+      ],
+      "type": "object"
+    }
+  },
+  "readOnly": true,
+  "required": [
+    "analysisId",
+    "context",
+    "deckRevisionId",
+    "idempotencyKey",
+    "jobId",
+    "jobKind",
+    "options",
+    "payloadVersion",
+    "requestedAt",
+    "retry"
+  ],
+  "title": "AnalyzeDeckJobPayload",
+  "type": "object"
+}

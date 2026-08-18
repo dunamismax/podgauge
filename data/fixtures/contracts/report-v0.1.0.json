@@ -1,0 +1,172 @@
+{
+  "analysisId": "analysis_00000000-0000-4000-8000-000000000001",
+  "context": {
+    "seed": "synthetic-seed-001",
+    "versions": {
+      "benchmark": {
+        "benchmarkVersionId": "benchmark_00000000-0000-4000-8000-000000000001",
+        "version": "0.1.0"
+      },
+      "cardData": {
+        "snapshotId": "card-data_00000000-0000-4000-8000-000000000001",
+        "version": "0.1.0"
+      },
+      "engine": {
+        "engineVersionId": "engine_00000000-0000-4000-8000-000000000001",
+        "version": "0.1.0"
+      },
+      "policy": {
+        "policyVersionId": "policy_00000000-0000-4000-8000-000000000001",
+        "version": "0.1.0"
+      },
+      "reportSchema": {
+        "reportSchemaVersionId": "report-schema_00000000-0000-4000-8000-000000000001",
+        "version": "0.1.0"
+      },
+      "simulation": {
+        "simulationVersionId": "simulation_00000000-0000-4000-8000-000000000001",
+        "version": "0.1.0"
+      }
+    }
+  },
+  "deckRevisionId": "revision_00000000-0000-4000-8000-000000000001",
+  "dependencies": [],
+  "evidence": [
+    {
+      "evidenceId": "evidence_00000000-0000-4000-8000-000000000001",
+      "kind": "source",
+      "provenanceIds": ["provenance_00000000-0000-4000-8000-000000000001"],
+      "sourceProvenanceId": "provenance_00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "extensions": {},
+  "findings": [
+    {
+      "evidenceIds": ["evidence_00000000-0000-4000-8000-000000000001"],
+      "findingId": "finding_00000000-0000-4000-8000-000000000001",
+      "outcome": "unknown",
+      "reasonCode": "methodology.unsupported",
+      "severity": "warning",
+      "subject": {
+        "dimension": "mana",
+        "kind": "deckprint-dimension"
+      },
+      "unknownClassificationId": "unknown_00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "options": {
+    "evidenceDetail": "full",
+    "simulation": {
+      "mode": "disabled"
+    }
+  },
+  "provenance": [
+    {
+      "authoredAt": "2026-08-17T12:00:00Z",
+      "contentHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "fixtureId": "fixture.report.unknown",
+      "provenanceId": "provenance_00000000-0000-4000-8000-000000000001",
+      "sourceKind": "synthetic"
+    }
+  ],
+  "reportId": "report_00000000-0000-4000-8000-000000000001",
+  "results": {
+    "capability": {
+      "status": "unknown",
+      "unknownClassificationIds": [
+        "unknown_00000000-0000-4000-8000-000000000001"
+      ]
+    },
+    "closingWindow": {
+      "status": "unknown",
+      "unknownClassificationIds": [
+        "unknown_00000000-0000-4000-8000-000000000001"
+      ]
+    },
+    "confidence": {
+      "coverageBasisPoints": 0,
+      "evidenceIds": ["evidence_00000000-0000-4000-8000-000000000001"],
+      "level": "low",
+      "unknownClassificationIds": [
+        "unknown_00000000-0000-4000-8000-000000000001"
+      ]
+    },
+    "deckprint": {
+      "access": {
+        "status": "unknown",
+        "unknownClassificationIds": [
+          "unknown_00000000-0000-4000-8000-000000000001"
+        ]
+      },
+      "cohesion": {
+        "status": "unknown",
+        "unknownClassificationIds": [
+          "unknown_00000000-0000-4000-8000-000000000001"
+        ]
+      },
+      "control": {
+        "status": "unknown",
+        "unknownClassificationIds": [
+          "unknown_00000000-0000-4000-8000-000000000001"
+        ]
+      },
+      "conversion": {
+        "status": "unknown",
+        "unknownClassificationIds": [
+          "unknown_00000000-0000-4000-8000-000000000001"
+        ]
+      },
+      "mana": {
+        "status": "unknown",
+        "unknownClassificationIds": [
+          "unknown_00000000-0000-4000-8000-000000000001"
+        ]
+      },
+      "recovery": {
+        "status": "unknown",
+        "unknownClassificationIds": [
+          "unknown_00000000-0000-4000-8000-000000000001"
+        ]
+      }
+    },
+    "officialBracketFloor": {
+      "status": "unknown",
+      "unknownClassificationIds": [
+        "unknown_00000000-0000-4000-8000-000000000001"
+      ]
+    },
+    "recommendedTableFit": {
+      "status": "unknown",
+      "unknownClassificationIds": [
+        "unknown_00000000-0000-4000-8000-000000000001"
+      ]
+    },
+    "tableImpact": {
+      "status": "unknown",
+      "unknownClassificationIds": [
+        "unknown_00000000-0000-4000-8000-000000000001"
+      ]
+    },
+    "volatility": {
+      "status": "unknown",
+      "unknownClassificationIds": [
+        "unknown_00000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  "sharedFailurePoints": [],
+  "status": "complete",
+  "unknownClassifications": [
+    {
+      "candidateCardIds": [],
+      "evidenceIds": ["evidence_00000000-0000-4000-8000-000000000001"],
+      "reasonCode": "methodology.unsupported",
+      "state": "unknown",
+      "subject": {
+        "dimension": "mana",
+        "kind": "deckprint-dimension"
+      },
+      "unknownClassificationId": "unknown_00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
