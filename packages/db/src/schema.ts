@@ -2,17 +2,15 @@ import type {
   AnalysisOptions,
   AnalysisProgressEvent,
   AnalysisReport,
+  BenchmarkVersionRecord,
+  CardDataSnapshot,
   DeckRevision,
+  EngineVersionRecord,
   Finding,
+  PolicyVersionRecord,
+  ReportSchemaVersionRecord,
+  SimulationVersionRecord,
   SourceProvenance,
-} from '@podgauge/contracts';
-import {
-  BenchmarkVersionRecordSchema,
-  CardDataSnapshotSchema,
-  EngineVersionRecordSchema,
-  PolicyVersionRecordSchema,
-  ReportSchemaVersionRecordSchema,
-  SimulationVersionRecordSchema,
 } from '@podgauge/contracts';
 import { sql } from 'drizzle-orm';
 import {
@@ -33,16 +31,6 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import type { z } from 'zod';
-
-type CardDataSnapshot = z.infer<typeof CardDataSnapshotSchema>;
-type PolicyVersionRecord = z.infer<typeof PolicyVersionRecordSchema>;
-type EngineVersionRecord = z.infer<typeof EngineVersionRecordSchema>;
-type BenchmarkVersionRecord = z.infer<typeof BenchmarkVersionRecordSchema>;
-type SimulationVersionRecord = z.infer<typeof SimulationVersionRecordSchema>;
-type ReportSchemaVersionRecord = z.infer<
-  typeof ReportSchemaVersionRecordSchema
->;
 
 const canonicalUuidPattern =
   '[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}';

@@ -163,5 +163,15 @@ export const AnalysisContextSchema = z
 
 export type CardDataSnapshot = z.infer<typeof CardDataSnapshotSchema>;
 export type PolicyVersionRecord = z.infer<typeof PolicyVersionRecordSchema>;
+export type EngineVersionRecord = z.infer<typeof EngineVersionRecordSchema>;
+export type BenchmarkVersionRecord = z.infer<
+  typeof BenchmarkVersionRecordSchema
+>;
+export type SimulationVersionRecord = z.infer<
+  typeof SimulationVersionRecordSchema
+>;
+export type ReportSchemaVersionRecord = z.infer<
+  typeof ReportSchemaVersionRecordSchema
+>;
 export type VersionTuple = z.infer<typeof VersionTupleSchema>;
 export type AnalysisContext = z.infer<typeof AnalysisContextSchema>;

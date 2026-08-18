@@ -87,8 +87,9 @@ a control, or make a public claim on the owner's behalf.
   before their dependent release tasks can close.
 - **Last verified:** Node 24.19.0 frozen install; the full repository verify with
   live PostgreSQL integration; isolated clean migration and Phase 3 constraint
-  tests; generated migration drift; cross-browser Playwright/axe smoke; worker,
-  source-sync, and benchmark smokes; and Compose validation on 2026-08-17.
+  tests; migration and seeding with contract build artifacts absent; generated
+  migration drift; cross-browser Playwright/axe smoke; worker, source-sync, and
+  benchmark smokes; and Compose validation on 2026-08-17.
 - **Production state:** no application is deployed; `podgauge.com` is a target,
   not a currently verified service.
 
@@ -868,6 +869,12 @@ The first generated schema review exposed parameter placeholders in CHECK
 expressions before publication; the schema source was corrected to emit literal
 static patterns, the migration was regenerated, and the migration-artifact test
 now rejects placeholders or missing handwritten constraint triggers.
+
+The first published GitHub run (`32095674246`) then exposed a clean-checkout
+ordering defect: migration loaded contract JavaScript before workspace packages
+were built. Database schema annotations now use type-only contract imports. A
+follow-up ran migration and seeding with `packages/contracts/dist` absent before
+rerunning the aggregate verification, matching CI's install-first ordering.
 
 ```sh
 mise exec node@24.19.0 -- corepack pnpm install --frozen-lockfile
